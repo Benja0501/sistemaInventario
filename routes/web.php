@@ -12,6 +12,7 @@ use App\Http\Controllers\PurchaseOrderItemController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReceptionItemController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ProductLocationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,8 @@ Route::resource('receptions.items', ReceptionItemController::class)
     ->only(['store', 'edit', 'update', 'destroy']);
 // Módulo ubicaciones
     Route::resource('locations', LocationController::class);
+// Modulo de productos por ubicación
+Route::resource('product_locations', ProductLocationController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
