@@ -13,7 +13,8 @@ class RoleController extends Controller
      */
     public function index()
     {
-        //
+        $roles = Role::orderBy('name')->paginate(15);
+        return view('inventory.role.index', compact('roles'));
     }
 
     /**
@@ -21,7 +22,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        //
+        return view('inventory.role.create');
     }
 
     /**
@@ -29,7 +30,10 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request)
     {
-        //
+        Role::create($request->validated());
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol creado correctamente.');
     }
 
     /**
@@ -37,7 +41,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        //
+        return view('inventory.role.show', compact('role'));
     }
 
     /**
@@ -45,7 +49,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        //
+        return view('inventory.role.edit', compact('role'));
     }
 
     /**
@@ -53,7 +57,10 @@ class RoleController extends Controller
      */
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        //
+        Role::create($request->validated());
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol creado correctamente.');
     }
 
     /**
@@ -61,6 +68,10 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        //
+        // Si hay lógica para impedir borrado si está asignado, agrégala aquí
+        $role->delete();
+
+        return redirect()->route('roles.index')
+            ->with('success', 'Rol eliminado correctamente.');
     }
 }

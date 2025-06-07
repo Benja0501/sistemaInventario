@@ -9,4 +9,15 @@ class Role extends Model
 {
     /** @use HasFactory<\Database\Factories\RoleFactory> */
     use HasFactory;
+    protected $fillable = [
+        'name',
+        'permissions', // asumimos JSON en BD
+    ];
+
+    /** 
+     * Cast `permissions` JSON ↔ array 
+     */
+    protected $casts = [
+        'permissions' => 'array',
+    ];
 }
