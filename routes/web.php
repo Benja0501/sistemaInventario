@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;    
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,7 +24,8 @@ Route::get('/dashboard', function () {
     Route::resource('suppliers', SupplierController::class);
 // Módulo Categorías
     Route::resource('categories', CategoryController::class);
-
+// Módulo Productos	
+Route::resource('products', ProductController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
