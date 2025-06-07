@@ -13,6 +13,7 @@ use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReceptionItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProductLocationController;
+use App\Http\Controllers\DiscrepancyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,6 +49,8 @@ Route::resource('receptions.items', ReceptionItemController::class)
     Route::resource('locations', LocationController::class);
 // Modulo de productos por ubicación
 Route::resource('product_locations', ProductLocationController::class);
+// Módulo de discrepancias
+    Route::resource('discrepancies', DiscrepancyController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
