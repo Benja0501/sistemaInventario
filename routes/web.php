@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseOrderItemController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\ReceptionItemController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,7 +37,11 @@ Route::resource('purchase_orders.items', PurchaseOrderItemController::class)
     ->shallow()
     ->only(['store', 'edit', 'update', 'destroy']);
 // Módulo Recepciones
-    Route::resource('receptions', ReceptionController::class);
+Route::resource('receptions', ReceptionController::class);
+// Detalle de recepción
+Route::resource('receptions.items', ReceptionItemController::class)
+    ->shallow()
+    ->only(['store', 'edit', 'update', 'destroy']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
