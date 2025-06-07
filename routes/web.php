@@ -14,6 +14,7 @@ use App\Http\Controllers\ReceptionItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProductLocationController;
 use App\Http\Controllers\DiscrepancyController;
+use App\Http\Controllers\BatchController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -51,6 +52,8 @@ Route::resource('receptions.items', ReceptionItemController::class)
 Route::resource('product_locations', ProductLocationController::class);
 // Módulo de discrepancias
     Route::resource('discrepancies', DiscrepancyController::class);
+// Módulo de lotes
+    Route::resource('batches', BatchController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
