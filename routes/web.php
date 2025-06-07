@@ -8,6 +8,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PurchaseOrderItemController;
+use App\Http\Controllers\ReceptionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +35,9 @@ Route::resource('purchases', PurchaseOrderController::class);
 Route::resource('purchase_orders.items', PurchaseOrderItemController::class)
     ->shallow()
     ->only(['store', 'edit', 'update', 'destroy']);
+// Módulo Recepciones
+    Route::resource('receptions', ReceptionController::class);
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

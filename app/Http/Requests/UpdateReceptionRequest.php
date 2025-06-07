@@ -11,7 +11,7 @@ class UpdateReceptionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check();
     }
 
     /**
@@ -22,7 +22,10 @@ class UpdateReceptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'purchase_order_id'     => 'required|exists:purchase_orders,id',
+            'received_by_user_id'   => 'required|exists:users,id',
+            'received_at'           => 'required|date',
+            'status'                => 'required|in:pending,completed,canceled',
         ];
     }
 }

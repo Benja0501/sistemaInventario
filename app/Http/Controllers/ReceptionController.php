@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reception;
+use App\Models\PurchaseOrder;
+use App\Models\User;
 use App\Http\Requests\StoreReceptionRequest;
 use App\Http\Requests\UpdateReceptionRequest;
 
@@ -13,7 +15,11 @@ class ReceptionController extends Controller
      */
     public function index()
     {
-        //
+        $receptions = Reception::with(['purchaseOrder', 'receiver'])
+            ->orderBy('received_at', 'desc')
+            ->paginate(15);
+
+        return view('inventory.reception.index', compact('receptions'));
     }
 
     /**
@@ -21,7 +27,9 @@ class ReceptionController extends Controller
      */
     public function create()
     {
-        //
+        $orders = PurchaseOrder::orderBy('order_date', 'desc')->get();
+        $users = User::orderBy('name')->get();
+        return view('inventory.reception.create', compact('orders', 'users'));
     }
 
     /**
@@ -29,7 +37,10 @@ class ReceptionController extends Controller
      */
     public function store(StoreReceptionRequest $request)
     {
-        //
+        Reception::create($request->validated());
+
+        return redirect()->route('receptions.index')
+            ->with('success', 'Recepción creada correctamente.');
     }
 
     /**
@@ -37,7 +48,8 @@ class ReceptionController extends Controller
      */
     public function show(Reception $reception)
     {
-        //
+        $reception->load('purchaseOrder', 'receiver', 'items');
+        return view('inventory.reception.show', compact('reception'));
     }
 
     /**
@@ -45,7 +57,9 @@ class ReceptionController extends Controller
      */
     public function edit(Reception $reception)
     {
-        //
+        $orders = PurchaseOrder::orderBy('order_date', 'desc')->get();
+        $users = User::orderBy('name')->get();
+        return view('inventory.reception.edit', compact('reception', 'orders', 'users'));
     }
 
     /**
@@ -53,7 +67,10 @@ class ReceptionController extends Controller
      */
     public function update(UpdateReceptionRequest $request, Reception $reception)
     {
-        //
+        $reception->update($request->validated());
+
+        return redirect()->route('receptions.index')
+            ->with('success', 'Recepción actualizada correctamente.');
     }
 
     /**
@@ -61,6 +78,9 @@ class ReceptionController extends Controller
      */
     public function destroy(Reception $reception)
     {
-        //
+        $reception->delete();
+
+        return redirect()->route('receptions.index')
+            ->with('success', 'Recepción eliminada correctamente.');
     }
 }
