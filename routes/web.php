@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;    
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseOrderController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,8 +26,9 @@ Route::get('/dashboard', function () {
 // Módulo Categorías
     Route::resource('categories', CategoryController::class);
 // Módulo Productos	
-Route::resource('products', ProductController::class);
-
+    Route::resource('products', ProductController::class);
+// Módulo Compras
+    Route::resource('purchases', PurchaseOrderController::class);
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
