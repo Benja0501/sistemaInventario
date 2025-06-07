@@ -11,13 +11,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('role')->paginate(15);
-        return view('inventory.users.index', compact('users'));
+        return view('inventory.user.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::orderBy('name')->get();
-        return view('inventory.users.create', compact('roles'));
+        return view('inventory.user.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -40,13 +40,13 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return view('inventory.users.show', compact('user'));
+        return view('inventory.user.show', compact('user'));
     }
 
     public function edit(User $user)
     {
         $roles = Role::orderBy('name')->get();
-        return view('inventory.users.edit', compact('user', 'roles'));
+        return view('inventory.user.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
