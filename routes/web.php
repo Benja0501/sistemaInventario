@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SupplierController;    
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,6 +18,8 @@ Route::get('/dashboard', function () {
     Route::resource('roles', RoleController::class);
 // Módulo Usuarios
     Route::resource('users', UserController::class);
+// Módulo Proveedores
+    Route::resource('suppliers', SupplierController::class);
 
 
 Route::middleware('auth')->group(function () {
