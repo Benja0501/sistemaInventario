@@ -30,7 +30,7 @@
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="{{ asset('assets/js/datepicker/jquery-ui.min.js') }}"></script>
     {{-- <script type="text/javascript" src="{{ asset('assets/js/functions_admin.js') }}"></script> --}}
-    <script src="assets/js/<?= $data['page_functions_js'] ?>"></script>
+    {{-- <script src="assets/js/<?= $data['page_functions_js'] ?>"></script> --}}
     </body>
 
     </html>

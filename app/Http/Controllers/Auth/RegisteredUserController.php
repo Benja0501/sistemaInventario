@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -35,10 +36,23 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // 2) Obtén los IDs de los roles "Administrador" y "Usuario"
+        $adminRoleId = Role::where('name', 'Administrador')->value('id');
+        $userRoleId  = Role::where('name', 'Usuario')->value('id');
+
+        // 3) Decide qué rol asignar:
+        //    - Si no hay ningún usuario aún, primer registro → Administrador
+        //    - En otro caso → Usuario (si existe), o Administrador si no existe rol "Usuario"
+        $assignedRoleId = (User::count() === 0 && $adminRoleId)
+                        ? $adminRoleId
+                        : ($userRoleId ?: $adminRoleId);
+
+        // 4) Crea el usuario con el rol asignado
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role_id'  => $assignedRoleId,
         ]);
 
         event(new Registered($user));

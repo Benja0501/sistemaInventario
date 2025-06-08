@@ -9,7 +9,7 @@
     <meta name="author" content="Abel OSH">
     <meta name="theme-color" content="#009688">
     <link rel="shortcut icon" href="{{ asset('assets/images/logo_dark.png') }}">
-    <title></title>
+    <title>@yield('title', 'Panel Inventario')</title>
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap-select.min.css') }}">

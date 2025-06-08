@@ -27,6 +27,10 @@ return new class extends Migration
             $table->string('evidence_path')->nullable();
             $table->unsignedBigInteger('reported_by_user_id')->nullable();
             $table->dateTime('reported_at')->useCurrent();
+            $table->enum('status', [
+                'pending',
+                'resolved'
+            ])->default('pending')->after('reported_at');
             $table->timestamps();
 
             // FK a products: sin cascada
