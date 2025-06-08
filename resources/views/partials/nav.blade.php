@@ -17,7 +17,7 @@
         <ul class="app-menu">
             {{-- Ver sitio público --}}
             <li>
-                <a class="app-menu__item" href="{{ route('welcome') }}" target="_blank">
+                <a class="app-menu__item" href="{{ route('welcome') }}">
                     <i class="app-menu__icon fa fa-globe"></i>
                     <span class="app-menu__label">Ver sitio web</span>
                 </a>

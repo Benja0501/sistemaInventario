@@ -32,27 +32,29 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // 2) Obtén los IDs de los roles "Administrador" y "Usuario"
-        $adminRoleId = Role::where('name', 'Administrador')->value('id');
-        $userRoleId  = Role::where('name', 'Usuario')->value('id');
+        // 1) Crea o recupera el rol Administrador y Usuario
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'Administrador'],
+            ['permissions' => null]
+        );
+        $userRole = Role::firstOrCreate(
+            ['name' => 'Usuario'],
+            ['permissions' => null]
+        );
+        // 2) Decide qué rol asignar al nuevo usuario
+        $assignedRoleId = User::count() === 0
+            ? $adminRole->id
+            : $userRole->id;
 
-        // 3) Decide qué rol asignar:
-        //    - Si no hay ningún usuario aún, primer registro → Administrador
-        //    - En otro caso → Usuario (si existe), o Administrador si no existe rol "Usuario"
-        $assignedRoleId = (User::count() === 0 && $adminRoleId)
-                        ? $adminRoleId
-                        : ($userRoleId ?: $adminRoleId);
-
-        // 4) Crea el usuario con el rol asignado
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id'  => $assignedRoleId,
+            'role_id' => $assignedRoleId,
         ]);
 
         event(new Registered($user));

@@ -15,6 +15,9 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap-select.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/js/datepicker/jquery-ui.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+    {{-- DataTables Bootstrap CSS --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap4.min.css">
 </head>
 
 <body class="app sidebar-mini">
@@ -36,10 +39,18 @@
                     <li><a class="dropdown-item" href=""><i class="fa fa-cog fa-lg"></i>
                             Settings</a></li>
                     <li><a class="dropdown-item" href=""><i class="fa fa-user fa-lg"></i> Profile</a></li>
-                    <li><a class="dropdown-item" href=""><i class="fa fa-sign-out fa-lg"></i>
-                            Logout</a></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('logout') }}"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fa fa-sign-out fa-lg"></i> Logout
+                        </a>
+
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                    </li>
                 </ul>
             </li>
         </ul>
     </header>
-@include('partials.nav')
+    @include('partials.nav')
