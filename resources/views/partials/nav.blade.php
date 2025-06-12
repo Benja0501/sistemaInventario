@@ -89,7 +89,7 @@
 
             {{-- Compras --}}
             <li class="{{ request()->is('purchase_orders*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('purchase_orders.index') }}">
+                <a class="app-menu__item" href="{{ route('purchases.index') }}">
                     <i class="app-menu__icon fa fa-shopping-cart"></i>
                     <span class="app-menu__label">Compras</span>
                 </a>

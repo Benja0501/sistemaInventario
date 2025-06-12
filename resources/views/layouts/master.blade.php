@@ -14,7 +14,7 @@
     </div>
 
     {{-- Flash messages --}}
-    @includeWhen(session('success'), 'partials.alert-success')
+    @includeWhen(session('success'), 'partials.alert-succes')
     @includeWhen(session('error'), 'partials.alert-error')
 
     {{-- Aquí va el contenido de cada vista --}}

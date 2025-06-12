@@ -7,7 +7,7 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Http\Requests\StoreReceptionRequest;
 use App\Http\Requests\UpdateReceptionRequest;
-
+use Carbon\Carbon;
 class ReceptionController extends Controller
 {
     /**
@@ -37,11 +37,20 @@ class ReceptionController extends Controller
      */
     public function store(StoreReceptionRequest $request)
     {
-        Reception::create($request->validated());
+        // 1. Validar y obtener datos (sin received_at)
+        $data = $request->validated();
 
-        return redirect()->route('receptions.index')
+        // 2. Fijar la fecha/hora actual
+        $data['received_at'] = Carbon::now();
+
+        // 3. Crear la recepción
+        Reception::create($data);
+
+        return redirect()
+            ->route('receptions.index')
             ->with('success', 'Recepción creada correctamente.');
     }
+
 
     /**
      * Display the specified resource.
@@ -67,11 +76,15 @@ class ReceptionController extends Controller
      */
     public function update(UpdateReceptionRequest $request, Reception $reception)
     {
-        $reception->update($request->validated());
+        $data = $request->validated();
+        // NO reescribimos received_at aquí
+        $reception->update($data);
 
-        return redirect()->route('receptions.index')
+        return redirect()
+            ->route('receptions.index')
             ->with('success', 'Recepción actualizada correctamente.');
     }
+
 
     /**
      * Remove the specified resource from storage.

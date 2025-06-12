@@ -36,25 +36,22 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // 1) Crea o recupera el rol Administrador y Usuario
-        $adminRole = Role::firstOrCreate(
-            ['name' => 'Administrador'],
-            ['permissions' => null]
-        );
-        $userRole = Role::firstOrCreate(
-            ['name' => 'Usuario'],
-            ['permissions' => null]
-        );
-        // 2) Decide qué rol asignar al nuevo usuario
-        $assignedRoleId = User::count() === 0
-            ? $adminRole->id
-            : $userRole->id;
+        // Asignar supervisor al primer usuario registrado.
+        // Comprueba si ya existe algún usuario en la base de datos.
+        $roleToAssign = User::count() === 0 ? 'supervisor' : 'almacenero';
+
+        // Si ya hay usuarios, no permitimos el registro público.
+        // Solo el supervisor podrá crear nuevos usuarios desde el panel.
+        if (User::count() > 0) {
+            // Podrías redirigir al login con un mensaje de error.
+            return redirect()->route('login')->with('error', 'El registro público está deshabilitado.');
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $assignedRoleId,
+            'role' => $roleToAssign,
         ]);
 
         event(new Registered($user));

@@ -71,7 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'suppliers' => SupplierController::class,
         'categories' => CategoryController::class,
         'products' => ProductController::class,
-        'purchase_orders' => PurchaseOrderController::class,
+        'purchases' => PurchaseOrderController::class,
         'receptions' => ReceptionController::class,
         'locations' => LocationController::class,
         'product_locations' => ProductLocationController::class,
@@ -79,13 +79,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'batches' => BatchController::class,
     ]);
 
-    // Ítems de Purchase Orders (anidado + shallow)
-    Route::resource('purchase_orders.items', PurchaseOrderItemController::class)
+    // Permisos (modal AJAX)
+    Route::get('roles/{role}/permissions', [RoleController::class, 'getPermissions'])
+        ->name('roles.permissions');
+    Route::post('roles/{role}/permissions', [RoleController::class, 'savePermissions'])
+        ->name('roles.permissions.save');
+
+    // Aquí añades la ruta anidada para los ítems:
+    Route::resource('purchases.items', PurchaseOrderItemController::class)
         ->shallow()
         ->only(['store', 'edit', 'update', 'destroy']);
 
-    // Ítems de Receptions (anidado + shallow)
-    Route::resource('receptions.items', ReceptionItemController::class)
+    // Rutas AJAX
+    Route::get(
+        'purchases/{purchase}/items/json',
+        [PurchaseOrderItemController::class, 'ajaxItems']
+    )
+        ->name('purchases.items.json');
+
+    // luego el resource normal:
+    Route::resource('purchases.items', PurchaseOrderItemController::class)
         ->shallow()
         ->only(['store', 'edit', 'update', 'destroy']);
+
 });
+

@@ -15,11 +15,11 @@ class ProductLocationController extends Controller
      */
     public function index()
     {
-        $links = ProductLocation::with(['product', 'location'])
+        $productLocations = ProductLocation::with(['product', 'location'])
             ->orderBy('product_id')
             ->paginate(15);
 
-        return view('inventory.product_location.index', compact('links'));
+        return view('inventory.product_location.index', compact('productLocations'));
     }
 
     /**

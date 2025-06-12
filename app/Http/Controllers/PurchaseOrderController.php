@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
-use App\Models\User;    
+use App\Models\User;
+use App\Models\Product;
 use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Requests\UpdatePurchaseOrderRequest;
 
@@ -29,7 +30,8 @@ class PurchaseOrderController extends Controller
     {
         $suppliers = Supplier::orderBy('business_name')->get();
         $users = User::orderBy('name')->get();
-        return view('inventory.purchase.create', compact('suppliers', 'users'));
+        $products = Product::orderBy('name')->get();
+        return view('inventory.purchase.create', compact('suppliers', 'users', 'products'));
     }
 
     /**
@@ -48,8 +50,9 @@ class PurchaseOrderController extends Controller
      */
     public function show(PurchaseOrder $purchaseOrder)
     {
-        $purchaseOrder->load('creator', 'supplier', 'items');
-        return view('inventory.purchase.show', compact('purchaseOrder'));
+        $purchaseOrder->load('creator', 'supplier', 'items.product');
+        $products = Product::orderBy('name')->get();
+        return view('inventory.purchase.show', compact('purchaseOrder', 'products'));
     }
 
     /**
@@ -59,7 +62,8 @@ class PurchaseOrderController extends Controller
     {
         $suppliers = Supplier::orderBy('business_name')->get();
         $users = User::orderBy('name')->get();
-        return view('inventory.purchase.edit', compact('purchaseOrder', 'suppliers', 'users'));
+        $products = Product::orderBy('name')->get();
+        return view('inventory.purchase.edit', compact('purchaseOrder', 'suppliers', 'users', 'products'));
     }
 
     /**
@@ -83,4 +87,19 @@ class PurchaseOrderController extends Controller
         return redirect()->route('purchases.index')
             ->with('success', 'Orden de compra eliminada correctamente.');
     }
+
+    public function ajaxItems(PurchaseOrder $purchase)
+    {
+        // cargar relación items→product
+        $items = $purchase->items()->with('product')->get()->map(function ($it) {
+            return [
+                'id' => $it->id,
+                'product' => $it->product->name,
+                'ordered' => $it->quantity,
+                'unit_price' => $it->unit_price,
+            ];
+        });
+        return response()->json($items);
+    }
+
 }

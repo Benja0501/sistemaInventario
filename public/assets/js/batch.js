@@ -1,0 +1,49 @@
+// batch.js
+$(document).ready(function () {
+    $("#batches-table").DataTable({
+        dom:
+            "<'row mb-3'<'col-sm-4'l><'col-sm-4'f><'col-sm-4 text-right'B>>" +
+            "<'row'<'col-sm-12 table-responsive'tr>>" +
+            "<'row mt-3'<'col-sm-5'i><'col-sm-7'p>>",
+        lengthMenu: [
+            [10, 25, 50, -1],
+            [10, 25, 50, "Todos"],
+        ],
+        buttons: [
+            {
+                extend: "copy",
+                text: '<i class="far fa-copy"></i>',
+                className: "btn btn-sm btn-outline-secondary",
+            },
+            {
+                extend: "excel",
+                text: '<i class="fas fa-file-excel"></i>',
+                className: "btn btn-sm btn-outline-success",
+            },
+            {
+                extend: "pdf",
+                text: '<i class="fas fa-file-pdf"></i>',
+                className: "btn btn-sm btn-outline-danger",
+            },
+            {
+                extend: "csv",
+                text: '<i class="fas fa-file-csv"></i>',
+                className: "btn btn-sm btn-outline-info",
+            },
+        ],
+        responsive: true,
+        columnDefs: [
+            { orderable: false, targets: -1 },
+            { className: "text-center", targets: -1 },
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
+        },
+    });
+
+    $(".btn-delete-batch").on("click", function (e) {
+        if (!confirm("¿Eliminar lote?")) {
+            e.preventDefault();
+        }
+    });
+});
