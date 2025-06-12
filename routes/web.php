@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('suppliers', SupplierController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
-        Route::resource('purchase-orders', PurchaseOrderController::class);
+        Route::resource('purchases', PurchaseOrderController::class);
 
         // Ruta específica para que el Supervisor apruebe una orden de compra
         Route::post('purchase-orders/{purchase_order}/approve', [PurchaseOrderController::class, 'approve'])

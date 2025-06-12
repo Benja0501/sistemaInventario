@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -21,18 +22,17 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('product')->id;
+        $productId = $this->route('product')->id;
 
         return [
-            'sku'             => "required|string|max:100|unique:products,sku,{$id}",
-            'name'            => 'required|string|max:150',
-            'description'     => 'nullable|string',
-            'unit_price'      => 'required|numeric|min:0',
-            'min_stock'       => 'required|integer|min:0',
-            'current_stock'   => 'required|integer|min:0',
-            'unit_of_measure' => 'required|string|max:50',
-            'category_id'     => 'required|exists:categories,id',
-            'status'          => 'required|in:active,inactive',
+            'name' => 'required|string|max:255',
+            'sku' => ['nullable', 'string', 'max:50', Rule::unique('products')->ignore($productId)],
+            'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+            'minimum_stock' => 'required|integer|min:0',
+            'status' => ['required', Rule::in(['active', 'discontinued', 'inactive'])],
+            'purchase_price' => 'nullable|numeric|min:0|max:99999999.99',
+            'sale_price' => 'required|numeric|min:0|max:99999999.99',
         ];
     }
 }

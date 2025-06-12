@@ -22,13 +22,12 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_number'            => 'required|string|unique:purchase_orders,order_number|max:50',
-            'created_by_user_id'      => 'required|exists:users,id',
-            'supplier_id'             => 'required|exists:suppliers,id',
-            'order_date'              => 'required|date',
-            'expected_delivery_date'  => 'nullable|date|after_or_equal:order_date',
-            'total_amount'            => 'required|numeric|min:0',
-            'status'                  => 'required|in:pending,approved,rejected,sent,partial_received,completed,canceled',
+            'supplier_id' => 'required|exists:suppliers,id',
+            'remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|exists:products,id',
+            'details.*.quantity' => 'required|integer|min:1',
+            'details.*.unit_price' => 'required|numeric|min:0',
         ];
     }
 }

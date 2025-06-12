@@ -13,12 +13,12 @@ class Product extends Model
         'sku',
         'name',
         'description',
-        'unit_price',
-        'min_stock',
-        'current_stock',
-        'unit_of_measure',
         'category_id',
+        'stock',
+        'minimum_stock',
         'status',
+        'purchase_price',
+        'sale_price',
     ];
 
     protected $casts = [
@@ -32,13 +32,13 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function batches()
+    public function stockEntries()
     {
-        return $this->hasMany(Batch::class);
+        return $this->hasMany(StockEntry::class);
     }
 
-    public function discrepancies()
+    public function stockExits()
     {
-        return $this->hasMany(Discrepancy::class);
+        return $this->hasMany(StockExit::class);
     }
 }

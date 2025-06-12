@@ -10,31 +10,21 @@ class PurchaseOrder extends Model
     /** @use HasFactory<\Database\Factories\PurchaseOrderFactory> */
     use HasFactory;
     protected $fillable = [
-        'order_number',
-        'created_by_user_id',
         'supplier_id',
-        'order_date',
-        'expected_delivery_date',
-        'total_amount',
+        'user_id',
+        'approved_by_id',
+        'approved_at',
+        'total',
         'status',
+        'remarks',
     ];
 
     protected $casts = [
-        'order_date'            => 'date',
-        'expected_delivery_date'=> 'date',
-        'total_amount'          => 'decimal:2',
+        'approved_at' => 'datetime',
     ];
 
     /**
-     * Quién creó la orden.
-     */
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
-    /**
-     * El proveedor de la orden.
+     * Relación: La orden pertenece a un proveedor.
      */
     public function supplier()
     {
@@ -42,10 +32,26 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Ítems de la orden de compra.
+     * Relación: La orden fue creada por un usuario.
      */
-    public function items()
+    public function user()
     {
-        return $this->hasMany(PurchaseOrderItem::class);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relación: La orden fue aprobada por un usuario (supervisor).
+     */
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    /**
+     * Relación: La orden tiene muchos detalles (productos).
+     */
+    public function details()
+    {
+        return $this->hasMany(PurchaseOrderDetail::class);
     }
 }

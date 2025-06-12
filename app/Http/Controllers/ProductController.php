@@ -14,10 +14,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category')
-            ->orderBy('name')
-            ->paginate(15);
-
+        $products = Product::with('category')->latest()->paginate(10);
         return view('inventory.product.index', compact('products'));
     }
 
@@ -26,7 +23,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::where('status', 'active')->get();
         return view('inventory.product.create', compact('categories'));
     }
 
@@ -36,9 +33,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         Product::create($request->validated());
-
-        return redirect()->route('products.index')
-            ->with('success', 'Producto creado correctamente.');
+        return redirect()->route('products.index')->with('success', 'Producto creado con éxito.');
     }
 
     /**
@@ -46,7 +41,6 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('category', 'batches', 'discrepancies');
         return view('inventory.product.show', compact('product'));
     }
 
@@ -55,7 +49,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::where('status', 'active')->get();
         return view('inventory.product.edit', compact('product', 'categories'));
     }
 
@@ -65,9 +59,7 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         $product->update($request->validated());
-
-        return redirect()->route('products.index')
-            ->with('success', 'Producto actualizado correctamente.');
+        return redirect()->route('products.index')->with('success', 'Producto actualizado con éxito.');
     }
 
     /**
@@ -75,9 +67,16 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        $product->delete();
+        // Verificamos si el producto tiene algún movimiento de stock asociado.
+        if ($product->stockEntries()->exists() || $product->stockExits()->exists()) {
+            // Si tiene historial, la mejor práctica es desactivarlo, no borrarlo.
+            $product->update(['status' => 'inactive']);
+            return redirect()->route('products.index')->with('success', 'El producto tiene historial, ha sido desactivado.');
+        }
 
-        return redirect()->route('products.index')
-            ->with('success', 'Producto eliminado correctamente.');
+        // Si no tiene ningún historial (ej: se creó por error), se puede eliminar.
+        $product->delete();
+        
+        return redirect()->route('products.index')->with('success', 'Producto eliminado con éxito.');
     }
 }
