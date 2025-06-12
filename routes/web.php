@@ -3,104 +3,100 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
-use App\Http\Controllers\PurchaseOrderItemController;
-use App\Http\Controllers\ReceptionController;
-use App\Http\Controllers\ReceptionItemController;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\ProductLocationController;
-use App\Http\Controllers\DiscrepancyController;
-use App\Http\Controllers\BatchController;
+use App\Http\Controllers\StockEntryController;
+use App\Http\Controllers\StockExitController;
+use App\Http\Controllers\DiscrepancyReportController;
 
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
 |--------------------------------------------------------------------------
-|
-| Sólo la página de bienvenida queda accesible sin iniciar sesión.
-|
 */
 
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-
 /*
 |--------------------------------------------------------------------------
-| Autenticación (Login, Register, Password Reset…)
+| Rutas de Autenticación
 |--------------------------------------------------------------------------
 |
-| Estas rutas NO requieren que el usuario esté logueado.
+| Login, registro (solo para el primer usuario), reseteo de contraseña, etc.
 |
 */
 require __DIR__ . '/auth.php';
 
-
 /*
 |--------------------------------------------------------------------------
-| Panel Administrativo
+| Panel de Control (Rutas Protegidas)
 |--------------------------------------------------------------------------
 |
-| Todas estas rutas requieren que el usuario esté autenticado (y verificado,
-| en el caso del dashboard). Si no quieres el middleware `verified`, bórralo.
+| Todas estas rutas requieren que el usuario haya iniciado sesión.
 |
 */
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])
-        ->name('dashboard');
+    // --- RUTAS COMUNES PARA TODOS LOS ROLES ---
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
-    // Perfil de Usuario
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 
-    // CRUD completos
-    Route::resources([
-        'roles' => RoleController::class,
-        'users' => UserController::class,
-        'suppliers' => SupplierController::class,
-        'categories' => CategoryController::class,
-        'products' => ProductController::class,
-        'purchases' => PurchaseOrderController::class,
-        'receptions' => ReceptionController::class,
-        'locations' => LocationController::class,
-        'product_locations' => ProductLocationController::class,
-        'discrepancies' => DiscrepancyController::class,
-        'batches' => BatchController::class,
-    ]);
 
-    // Permisos (modal AJAX)
-    Route::get('roles/{role}/permissions', [RoleController::class, 'getPermissions'])
-        ->name('roles.permissions');
-    Route::post('roles/{role}/permissions', [RoleController::class, 'savePermissions'])
-        ->name('roles.permissions.save');
+    // --- RUTAS SOLO PARA EL SUPERVISOR ---
+    // El Supervisor tiene control total sobre la gestión de usuarios.
+    Route::middleware(['role:supervisor'])->group(function () {
+        Route::resource('users', UserController::class);
+        // Aquí podrían ir rutas de configuración general del sistema.
+    });
 
-    // Aquí añades la ruta anidada para los ítems:
-    Route::resource('purchases.items', PurchaseOrderItemController::class)
-        ->shallow()
-        ->only(['store', 'edit', 'update', 'destroy']);
 
-    // Rutas AJAX
-    Route::get(
-        'purchases/{purchase}/items/json',
-        [PurchaseOrderItemController::class, 'ajaxItems']
-    )
-        ->name('purchases.items.json');
+    // --- RUTAS PARA COMPRAS Y SUPERVISOR ---
+    // Estos roles gestionan los catálogos y el proceso de compra.
+    Route::middleware(['role:supervisor,purchasing'])->group(function () {
+        Route::resource('suppliers', SupplierController::class);
+        Route::resource('categories', CategoryController::class);
+        Route::resource('products', ProductController::class);
+        Route::resource('purchase-orders', PurchaseOrderController::class);
 
-    // luego el resource normal:
-    Route::resource('purchases.items', PurchaseOrderItemController::class)
-        ->shallow()
-        ->only(['store', 'edit', 'update', 'destroy']);
+        // Ruta específica para que el Supervisor apruebe una orden de compra
+        Route::post('purchase-orders/{purchase_order}/approve', [PurchaseOrderController::class, 'approve'])
+            ->name('purchase-orders.approve')
+            ->middleware('role:supervisor');
+    });
+
+
+    // --- RUTAS PARA ALMACÉN Y SUPERVISOR ---
+    // Estos roles gestionan el inventario físico y los movimientos.
+    Route::middleware(['role:supervisor,warehouse'])->group(function () {
+        // Ruta para registrar la recepción de una orden de compra
+        Route::post('purchase-orders/{purchase_order}/receive', [PurchaseOrderController::class, 'registerReception'])
+            ->name('purchase-orders.receive');
+            
+        // Rutas para registrar salidas manuales (merma, etc.)
+        Route::resource('stock-exits', StockExitController::class)->only(['create', 'store']);
+
+        // Rutas para los informes de discrepancia
+        Route::resource('discrepancy-reports', DiscrepancyReportController::class);
+        
+        // Ruta para que el Supervisor apruebe el ajuste de stock de un informe
+        Route::post('discrepancy-reports/{discrepancy_report}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
+            ->name('discrepancy-reports.adjust')
+            ->middleware('role:supervisor');
+    });
+
+    // --- RUTAS DE CONSULTA ---
+    // Rutas que solo muestran información y podrían ser accesibles para más roles
+    Route::get('stock-entries', [StockEntryController::class, 'index'])->name('stock-entries.index');
+    Route::get('stock-exits', [StockExitController::class, 'index'])->name('stock-exits.index');
 
 });
-

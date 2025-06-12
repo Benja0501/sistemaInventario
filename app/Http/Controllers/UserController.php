@@ -3,39 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('role')->paginate(15);
+        $users = User::latest()->paginate(10);
         return view('inventory.user.index', compact('users'));
     }
 
     public function create()
     {
-        $roles = Role::orderBy('name')->get();
-        return view('inventory.user.create', compact('roles'));
+        return view('inventory.user.create');
     }
 
     public function store(Request $request)
     {
-        // Luego reemplaza Request por StoreUserRequest y $request->validated()
-        $data = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'role_id' => 'required|exists:roles,id',
-        ]);
+        $validatedData = $request->validated();
+        
+        User::create($validatedData);
 
-        $data['password'] = bcrypt($data['password']);
-
-        User::create($data);
-
-        return redirect()->route('users.index')
-            ->with('success', 'Usuario creado correctamente.');
+        return redirect()->route('users.index')->with('success', 'Usuario creado con éxito.');
     }
 
     public function show(User $user)
@@ -45,37 +34,28 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::orderBy('name')->get();
-        return view('inventory.user.edit', compact('user', 'roles'));
+        return view('inventory.user.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
-        // Luego reemplaza Request por UpdateUserRequest y $request->validated()
-        $data = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'role_id' => 'required|exists:roles,id',
-        ]);
+        $validatedData = $request->validated();
 
-        if (empty($data['password'])) {
-            unset($data['password']);
-        } else {
-            $data['password'] = bcrypt($data['password']);
+        if (empty($validatedData['password'])) {
+            unset($validatedData['password']);
         }
 
-        $user->update($data);
+        $user->update($validatedData);
 
-        return redirect()->route('users.index')
-            ->with('success', 'Usuario actualizado correctamente.');
+        // Apuntamos a la nueva ruta 'users.index'
+        return redirect()->route('users.index')->with('success', 'Usuario actualizado con éxito.');
     }
 
     public function destroy(User $user)
     {
-        $user->delete();
+        $user->update(['status' => 'inactive']);
 
-        return redirect()->route('users.index')
-            ->with('success', 'Usuario eliminado correctamente.');
+        // Apuntamos a la nueva ruta 'users.index'
+        return redirect()->route('users.index')->with('success', 'Usuario desactivado con éxito.');
     }
 }
