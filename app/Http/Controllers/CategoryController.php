@@ -13,7 +13,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::orderBy('name')->paginate(15);
+        $categories = Category::latest()->paginate(10);
         return view('inventory.category.index', compact('categories'));
     }
 
@@ -31,9 +31,7 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request)
     {
         Category::create($request->validated());
-
-        return redirect()->route('categories.index')
-            ->with('success', 'Categoría creada correctamente.');
+        return redirect()->route('categories.index')->with('success', 'Categoría creada con éxito.');
     }
 
     /**
@@ -58,9 +56,7 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, Category $category)
     {
         $category->update($request->validated());
-
-        return redirect()->route('categories.index')
-            ->with('success', 'Categoría actualizada correctamente.');
+        return redirect()->route('categories.index')->with('success', 'Categoría actualizada con éxito.');
     }
 
     /**
@@ -68,14 +64,15 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        // Verificamos si la categoría tiene productos relacionados.
         if ($category->products()->exists()) {
-            return redirect()->route('categories.index')
-                ->with('error', 'No se puede eliminar una categoría con productos asignados.');
+            // Si tiene productos, no permitimos la eliminación y enviamos un error.
+            return redirect()->route('categories.index')->with('error', 'No se puede eliminar la categoría porque tiene productos asociados.');
         }
 
+        // Si no tiene productos, la eliminamos.
         $category->delete();
-
-        return redirect()->route('categories.index')
-            ->with('success', 'Categoría eliminada correctamente.');
+        
+        return redirect()->route('categories.index')->with('success', 'Categoría eliminada con éxito.');
     }
 }
