@@ -13,7 +13,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        $suppliers = Supplier::orderBy('business_name')->paginate(15);
+        $suppliers = Supplier::latest()->paginate(10);
         return view('inventory.supplier.index', compact('suppliers'));
     }
 
@@ -31,9 +31,7 @@ class SupplierController extends Controller
     public function store(StoreSupplierRequest $request)
     {
         Supplier::create($request->validated());
-
-        return redirect()->route('suppliers.index')
-            ->with('success', 'Proveedor creado correctamente.');
+        return redirect()->route('suppliers.index')->with('success', 'Proveedor creado con éxito.');
     }
 
     /**
@@ -58,9 +56,7 @@ class SupplierController extends Controller
     public function update(UpdateSupplierRequest $request, Supplier $supplier)
     {
         $supplier->update($request->validated());
-
-        return redirect()->route('suppliers.index')
-            ->with('success', 'Proveedor actualizado correctamente.');
+        return redirect()->route('suppliers.index')->with('success', 'Proveedor actualizado con éxito.');
     }
 
     /**
@@ -68,14 +64,7 @@ class SupplierController extends Controller
      */
     public function destroy(Supplier $supplier)
     {
-        if ($supplier->purchaseOrders()->exists()) {
-            return redirect()->route('suppliers.index')
-                ->with('error', 'No se puede eliminar un proveedor con órdenes de compra.');
-        }
-
-        $supplier->delete();
-
-        return redirect()->route('suppliers.index')
-            ->with('success', 'Proveedor eliminado correctamente.');
+        $supplier->update(['status' => 'inactive']);
+        return redirect()->route('suppliers.index')->with('success', 'Proveedor desactivado con éxito.');
     }
 }

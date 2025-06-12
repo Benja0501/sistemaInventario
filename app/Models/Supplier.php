@@ -10,10 +10,10 @@ class Supplier extends Model
     /** @use HasFactory<\Database\Factories\SupplierFactory> */
     use HasFactory;
     protected $fillable = [
-        'business_name',
-        'tax_id',
-        'address',
+        'name',
+        'ruc',
         'phone',
+        'address',
         'email',
         'status',
     ];

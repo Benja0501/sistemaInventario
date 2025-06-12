@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSupplierRequest extends FormRequest
 {
@@ -22,12 +23,12 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'business_name' => 'required|string|max:150',
-            'tax_id'        => 'required|string|max:50|unique:suppliers,tax_id',
-            'address'       => 'nullable|string|max:500',
-            'phone'         => 'nullable|string|max:50',
-            'email'         => 'nullable|email|max:150',
-            'status'        => 'required|in:active,inactive',
+            'name' => 'required|string|max:255',
+            'ruc' => 'required|string|size:11|unique:suppliers,ruc',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'status' => ['required', Rule::in(['active', 'inactive'])],
         ];
     }
 }
