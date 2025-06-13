@@ -11,7 +11,7 @@ class StoreDiscrepancyReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class StoreDiscrepancyReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'count_date' => 'required|date',
+            'general_remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|exists:products,id',
+            'details.*.physical_quantity' => 'required|integer|min:0',
+            'details.*.justification' => 'nullable|string',
         ];
     }
 }

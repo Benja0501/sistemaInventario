@@ -86,11 +86,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('exits', StockExitController::class)->only(['create', 'store']);
 
         // Rutas para los informes de discrepancia
-        Route::resource('discrepancy-reports', DiscrepancyReportController::class);
+        Route::resource('discrepancies', DiscrepancyReportController::class);
 
         // Ruta para que el Supervisor apruebe el ajuste de stock de un informe
-        Route::post('discrepancy-reports/{discrepancy_report}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
-            ->name('discrepancy-reports.adjust')
+        Route::post('discrepancies/{discrepancy}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
+            ->name('discrepancies.adjust')
             ->middleware('role:supervisor');
         Route::get('stock-entries/create', [StockEntryController::class, 'create'])->name('stock-entries.create');
         Route::post('stock-entries', [StockEntryController::class, 'store'])->name('stock-entries.store');
