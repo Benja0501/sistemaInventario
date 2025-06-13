@@ -81,22 +81,24 @@ Route::middleware(['auth'])->group(function () {
         // Ruta para registrar la recepción de una orden de compra
         Route::post('purchase-orders/{purchase_order}/receive', [PurchaseOrderController::class, 'registerReception'])
             ->name('purchase-orders.receive');
-            
+
         // Rutas para registrar salidas manuales (merma, etc.)
-        Route::resource('stock-exits', StockExitController::class)->only(['create', 'store']);
+        Route::resource('exits', StockExitController::class)->only(['create', 'store']);
 
         // Rutas para los informes de discrepancia
         Route::resource('discrepancy-reports', DiscrepancyReportController::class);
-        
+
         // Ruta para que el Supervisor apruebe el ajuste de stock de un informe
         Route::post('discrepancy-reports/{discrepancy_report}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
             ->name('discrepancy-reports.adjust')
             ->middleware('role:supervisor');
+        Route::get('stock-entries/create', [StockEntryController::class, 'create'])->name('stock-entries.create');
+        Route::post('stock-entries', [StockEntryController::class, 'store'])->name('stock-entries.store');
     });
 
     // --- RUTAS DE CONSULTA ---
     // Rutas que solo muestran información y podrían ser accesibles para más roles
-    Route::get('stock-entries', [StockEntryController::class, 'index'])->name('stock-entries.index');
-    Route::get('stock-exits', [StockExitController::class, 'index'])->name('stock-exits.index');
+    Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
+    Route::get('exits', [StockExitController::class, 'index'])->name('exits.index');
 
 });
