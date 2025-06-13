@@ -2,15 +2,10 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="description" content="Tienda Virtual Abel OSH">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Abel OSH">
-    <meta name="theme-color" content="#009688">
     <link rel="shortcut icon" href="{{ asset('assets/images/logo_dark.png') }}">
-    <title>@yield('title', 'Panel Inventario')</title>
-    <!-- Main CSS-->
+    {{-- ... (todo tu código del head está perfecto) ... --}}
+    <title>@yield('title', 'FEMAZA - Inventario')</title>
+    {{-- ... (todos tus links CSS están perfectos) ... --}}
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/bootstrap-select.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/js/datepicker/jquery-ui.min.css') }}">
@@ -18,6 +13,7 @@
     {{-- DataTables Bootstrap CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap4.min.css">
+
 </head>
 
 <body class="app sidebar-mini">
@@ -26,25 +22,22 @@
             <img src="{{ asset('assets/images/loading.svg') }}" alt="Loading">
         </div>
     </div>
-    <!-- Navbar-->
-    <header class="app-header"><a class="app-header__logo" href="{{ route('dashboard') }}">Tienda Femaza</a>
-        <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar"
-            aria-label="Hide Sidebar"><i class="fas fa-bars"></i></a>
-        <!-- Navbar Right Menu-->
+    <header class="app-header"><a class="app-header__logo" href="{{ route('dashboard') }}">FEMAZA S.A.</a>
+        <a class="app-sidebar__toggle" href="#" data-toggle="sidebar" aria-label="Hide Sidebar"><i
+                class="fas fa-bars"></i></a>
         <ul class="app-nav">
-            <!-- User Menu-->
             <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown"
                     aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
                 <ul class="dropdown-menu settings-menu dropdown-menu-right">
-                    <li><a class="dropdown-item" href=""><i class="fa fa-cog fa-lg"></i>
-                            Settings</a></li>
-                    <li><a class="dropdown-item" href=""><i class="fa fa-user fa-lg"></i> Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
+                    {{-- LÍNEA CORREGIDA: Apunta a la ruta del perfil --}}
+                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fa fa-user fa-lg"></i>
+                            Perfil</a></li>
                     <li>
                         <a class="dropdown-item" href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="fa fa-sign-out fa-lg"></i> Logout
+                            <i class="fa fa-sign-out fa-lg"></i> Salir
                         </a>
-
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                             @csrf
                         </form>
@@ -53,4 +46,5 @@
             </li>
         </ul>
     </header>
+    {{-- Incluimos el menú de navegación --}}
     @include('partials.nav')

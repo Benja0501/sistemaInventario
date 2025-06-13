@@ -1,130 +1,83 @@
-    <!-- Sidebar menu-->
-    <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
-    <aside class="app-sidebar">
-        {{-- Usuario logueado --}}
-        <div class="app-sidebar__user">
-            <img class="app-sidebar__user-avatar" src="{{ asset('assets/images/avatar.png') }}" alt="User Image">
-            <div>
-                <p class="app-sidebar__user-name">
-                    {{ auth()->user()->name }}
-                </p>
-                <p class="app-sidebar__user-designation">
-                    {{ optional(auth()->user()->role)->name ?? 'Sin asignar' }}
-                </p>
-            </div>
+<div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+<aside class="app-sidebar">
+    <div class="app-sidebar__user">
+        <img class="app-sidebar__user-avatar" src="{{ asset('assets/images/avatar.png') }}" alt="User Image">
+        <div>
+            <p class="app-sidebar__user-name">
+                {{ auth()->user()->name }}
+            </p>
+            {{-- LÍNEA CORREGIDA: Muestra el rol directamente --}}
+            <p class="app-sidebar__user-designation">
+                {{ ucfirst(auth()->user()->role) }}
+            </p>
         </div>
+    </div>
 
-        <ul class="app-menu">
-            {{-- Ver sitio público --}}
-            <li>
-                <a class="app-menu__item" href="{{ route('welcome') }}">
-                    <i class="app-menu__icon fa fa-globe"></i>
-                    <span class="app-menu__label">Ver sitio web</span>
-                </a>
-            </li>
+    <ul class="app-menu">
+        <li>
+            <a class="app-menu__item {{ request()->is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                <i class="app-menu__icon fa fa-tachometer-alt"></i>
+                <span class="app-menu__label">Dashboard</span>
+            </a>
+        </li>
 
-            {{-- Dashboard --}}
-            <li class="{{ request()->is('dashboard') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('dashboard') }}">
-                    <i class="app-menu__icon fa fa-tachometer-alt"></i>
-                    <span class="app-menu__label">Dashboard</span>
-                </a>
-            </li>
-
-            {{-- Usuarios y Roles --}}
-            <li class="treeview {{ request()->is('users*') || request()->is('roles*') ? 'is-expanded' : '' }}">
-                <a class="app-menu__item" href="#" data-toggle="treeview">
+        {{-- MENÚ SOLO PARA SUPERVISOR --}}
+        @if (auth()->user()->role == 'supervisor')
+            <li class="{{ request()->is('users*') ? 'active' : '' }}">
+                <a class="app-menu__item" href="{{ route('users.index') }}">
                     <i class="app-menu__icon fa fa-users"></i>
                     <span class="app-menu__label">Usuarios</span>
-                    <i class="treeview-indicator fa fa-angle-right"></i>
-                </a>
-                <ul class="treeview-menu">
-                    <li>
-                        <a class="treeview-item" href="{{ route('users.index') }}">
-                            <i class="icon fa fa-user"></i> Usuarios
-                        </a>
-                    </li>
-                    <li>
-                        <a class="treeview-item" href="{{ route('roles.index') }}">
-                            <i class="icon fa fa-user-shield"></i> Roles
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            {{-- Proveedores --}}
-            <li class="{{ request()->is('suppliers*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('suppliers.index') }}">
-                    <i class="app-menu__icon fa fa-truck"></i>
-                    <span class="app-menu__label">Proveedores</span>
                 </a>
             </li>
+        @endif
 
-            {{-- Tienda --}}
+        {{-- MENÚ PARA SUPERVISOR Y COMPRAS --}}
+        @if (in_array(auth()->user()->role, ['supervisor', 'purchasing']))
             <li
-                class="treeview {{ request()->is('products*') || request()->is('categories*') || request()->is('batches*') ? 'is-expanded' : '' }}">
+                class="treeview {{ request()->is('suppliers*') || request()->is('categories*') || request()->is('products*') ? 'is-expanded' : '' }}">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="app-menu__icon fa fa-store"></i>
-                    <span class="app-menu__label">Tienda</span>
+                    <span class="app-menu__label">Catálogos</span>
                     <i class="treeview-indicator fa fa-angle-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li>
-                        <a class="treeview-item" href="{{ route('products.index') }}">
-                            <i class="icon fa fa-box"></i> Productos
-                        </a>
-                    </li>
-                    <li>
-                        <a class="treeview-item" href="{{ route('categories.index') }}">
-                            <i class="icon fa fa-tags"></i> Categorías
-                        </a>
-                    </li>
-                    <li>
-                        <a class="treeview-item" href="{{ route('batches.index') }}">
-                            <i class="icon fa fa-layer-group"></i> Lotes
-                        </a>
-                    </li>
+                    <li><a class="treeview-item" href="{{ route('suppliers.index') }}"><i class="icon fa fa-truck"></i>
+                            Proveedores</a></li>
+                    <li><a class="treeview-item" href="{{ route('categories.index') }}"><i class="icon fa fa-tags"></i>
+                            Categorías</a></li>
+                    <li><a class="treeview-item" href="{{ route('products.index') }}"><i class="icon fa fa-box"></i>
+                            Productos</a></li>
                 </ul>
             </li>
-
-            {{-- Compras --}}
-            <li class="{{ request()->is('purchase_orders*') ? 'active' : '' }}">
+            {{-- LÍNEA CORREGIDA: Nombre de la ruta --}}
+            <li class="{{ request()->is('purchase-orders*') ? 'active' : '' }}">
                 <a class="app-menu__item" href="{{ route('purchases.index') }}">
                     <i class="app-menu__icon fa fa-shopping-cart"></i>
-                    <span class="app-menu__label">Compras</span>
+                    <span class="app-menu__label">Órdenes de Compra</span>
                 </a>
             </li>
+        @endif
 
-            {{-- Ubicaciones --}}
-            <li class="{{ request()->is('locations*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('locations.index') }}">
-                    <i class="app-menu__icon fa fa-map-marker-alt"></i>
-                    <span class="app-menu__label">Ubicaciones</span>
+        {{-- MENÚ PARA SUPERVISOR Y ALMACÉN --}}
+        @if (in_array(auth()->user()->role, ['supervisor', 'warehouse']))
+            <li
+                class="treeview {{ request()->is('stock-entries*') || request()->is('stock-exits*') || request()->is('discrepancy-reports*') ? 'is-expanded' : '' }}">
+                <a class="app-menu__item" href="#" data-toggle="treeview">
+                    <i class="app-menu__icon fa fa-archive"></i>
+                    <span class="app-menu__label">Gestión de Stock</span>
+                    <i class="treeview-indicator fa fa-angle-right"></i>
                 </a>
+                <ul class="treeview-menu">
+                    {{-- LÍNEAS CORREGIDAS: Nombres de rutas --}}
+                    <li><a class="treeview-item" href="{{ route('entries.index') }}"><i
+                                class="icon fa fa-arrow-down"></i> Entradas</a></li>
+                    <li><a class="treeview-item" href="{{ route('exits.index') }}"><i
+                                class="icon fa fa-arrow-up"></i> Salidas</a></li>
+                    <li><a class="treeview-item" href="{{ route('discrepancies.index') }}"><i
+                                class="icon fa fa-exclamation-triangle"></i> Discrepancias</a></li>
+                </ul>
             </li>
+        @endif
 
-            {{-- Ubicación de productos --}}
-            <li class="{{ request()->is('product_locations*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('product_locations.index') }}">
-                    <i class="app-menu__icon fa fa-map-marked-alt"></i>
-                    <span class="app-menu__label">Ubicación de productos</span>
-                </a>
-            </li>
-
-            {{-- Recepciones --}}
-            <li class="{{ request()->is('receptions*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('receptions.index') }}">
-                    <i class="app-menu__icon fa fa-receipt"></i>
-                    <span class="app-menu__label">Recepciones</span>
-                </a>
-            </li>
-
-            {{-- Discrepancias --}}
-            <li class="{{ request()->is('discrepancies*') ? 'active' : '' }}">
-                <a class="app-menu__item" href="{{ route('discrepancies.index') }}">
-                    <i class="app-menu__icon fa fa-exclamation-triangle"></i>
-                    <span class="app-menu__label">Discrepancias</span>
-                </a>
-            </li>
-        </ul>
-    </aside>
+    </ul>
+</aside>

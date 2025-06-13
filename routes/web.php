@@ -102,3 +102,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('exits', [StockExitController::class, 'index'])->name('exits.index');
 
 });
+
+Route::get('/debug-db-schema', function () {
+    try {
+        // Esta consulta le pregunta directamente a SQL Server cómo es la tabla 'users'
+        $schema = DB::select("
+            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = 'users'
+        ");
+        
+        // Muestra el resultado en formato JSON para que podamos leerlo fácilmente
+        return response()->json($schema);
+
+    } catch (\Exception $e) {
+        // Si hay algún error de conexión, también lo veremos
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});

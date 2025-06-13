@@ -20,6 +20,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        if (User::count() > 0) {
+            // Si ya existe al menos un usuario, no muestra la página de registro pública.
+            abort(404);
+        }
         return view('auth.register');
     }
 
@@ -30,6 +34,11 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // No permitimos que nadie más se registre si ya existe el supervisor.
+        if (User::count() > 0) {
+            abort(403, 'Registro deshabilitado.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
@@ -38,7 +47,7 @@ class RegisteredUserController extends Controller
 
         // Asignar supervisor al primer usuario registrado.
         // Comprueba si ya existe algún usuario en la base de datos.
-        $roleToAssign = User::count() === 0 ? 'supervisor' : 'almacenero';
+        $roleToAssign = User::count() === 0 ? 'supervisor' : 'warehouse';
 
         // Si ya hay usuarios, no permitimos el registro público.
         // Solo el supervisor podrá crear nuevos usuarios desde el panel.
@@ -50,8 +59,10 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            //'password' => Hash::make($request->password),
+            'password' => $request->password,
             'role' => $roleToAssign,
+            'status' => 'active',
         ]);
 
         event(new Registered($user));

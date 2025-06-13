@@ -1,3 +1,5 @@
+{{-- resources/views/partials/footer.blade.php --}}
+
 <!-- Essential javascripts for application to work-->
 <script src="{{ asset('assets/js/jquery-3.3.1.min.js') }}"></script>
 <script src="{{ asset('assets/js/popper.min.js') }}"></script>
