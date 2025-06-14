@@ -82,8 +82,8 @@ Route::middleware(['auth'])->group(function () {
         // --- RUTAS CORREGIDAS Y UNIFICADAS ---
         Route::resource('exits', StockExitController::class)->only(['index', 'create', 'store']);
         Route::resource('discrepancies', DiscrepancyReportController::class);
-        Route::get('entries/create', [StockEntryController::class, 'create'])->name('stock-entries.create');
-        Route::post('entries', [StockEntryController::class, 'store'])->name('stock-entries.store');
+        Route::get('entries/create', [StockEntryController::class, 'create'])->name('entries.create');
+        Route::post('entries', [StockEntryController::class, 'store'])->name('entries.store');
         
         Route::post('discrepancies/{discrepancy}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
             ->name('discrepancies.adjust')
@@ -94,25 +94,4 @@ Route::middleware(['auth'])->group(function () {
     // Rutas que solo muestran información y podrían ser accesibles para más roles
     Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
 
-});
-
-// routes/web.php
-
-use Illuminate\Support\Facades\DB;
-
-// Ruta temporal solo para depuración. Puedes borrarla después.
-Route::get('/debug-po-schema', function () {
-    try {
-        // Le preguntamos directamente a SQL Server cómo es la tabla 'purchase_orders'
-        $schema = DB::select("
-            SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = 'purchase_orders'
-        ");
-        
-        return response()->json($schema);
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
 });

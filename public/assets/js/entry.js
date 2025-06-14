@@ -1,20 +1,14 @@
-// public/assets/js/users.js
-
 $(document).ready(function () {
-    $("#users-table").DataTable({
+    $("#stock-entries-table").DataTable({
+        // La configuración de dom, lengthMenu y buttons es la misma que ya tienes
         dom:
-            // row 1: length selector (l)  |  filter input (f)  |  buttons (B)
-            "<'row mb-3'<'col-sm-4'l><'col-sm-4'f><'col-sm-4 text-right'B>>" +
-            // row 2: table
+            "<'row mb-3'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-4'f><'col-sm-12 col-md-4 text-right'B>>" +
             "<'row'<'col-sm-12 table-responsive'tr>>" +
-            // row 3: info (i)           |  pagination (p)
             "<'row mt-3'<'col-sm-5'i><'col-sm-7'p>>",
-
         lengthMenu: [
             [10, 25, 50, -1],
             [10, 25, 50, "Todos"],
         ],
-
         buttons: [
             {
                 extend: "copy",
@@ -37,16 +31,16 @@ $(document).ready(function () {
                 className: "btn btn-sm btn-outline-info",
             },
         ],
-
         responsive: true,
-
+        // Ordenamos por la primera columna (Fecha) de forma descendente por defecto
+        order: [[0, 'desc']], 
         columnDefs: [
-            { orderable: false, targets: -1 },
-            { className: "text-center", targets: -1 },
+            // La última columna ('Acciones') no se podrá ordenar
+            { orderable: false, targets: -1 }, 
         ],
-
         language: {
             url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
         },
     });
+
 });

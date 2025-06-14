@@ -28,6 +28,7 @@ class StockEntryController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'reason' => 'nullable|string|max:255',
             'batch' => 'nullable|string|max:255',
             'expiration_date' => 'nullable|date',
             // Podríamos añadir un campo 'motivo' si quisiéramos
@@ -39,6 +40,7 @@ class StockEntryController extends Controller
                 'product_id' => $request->product_id,
                 'user_id' => auth()->id(),
                 'quantity' => $request->quantity,
+                'reason' => $request->reason,
                 'batch' => $request->batch,
                 'expiration_date' => $request->expiration_date,
                 'received_at' => now(),

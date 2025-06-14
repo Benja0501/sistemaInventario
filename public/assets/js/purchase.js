@@ -41,9 +41,4 @@ $(document).ready(function () {
             url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
         },
     });
-
-    // Confirmación al eliminar orden
-    $("#purchases-table").on("click", "form button", function (e) {
-        if (!confirm("¿Eliminar orden de compra?")) e.preventDefault();
-    });
 });

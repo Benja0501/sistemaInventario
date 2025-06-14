@@ -14,6 +14,7 @@ class StockEntry extends Model
         'purchase_order_id',
         'user_id',
         'quantity',
+        'reason',
         'batch',
         'expiration_date',
         'received_at',

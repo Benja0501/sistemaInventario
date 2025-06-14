@@ -39,11 +39,4 @@ $(document).ready(function () {
             url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json",
         },
     });
-
-    // Confirmación al eliminar proveedor
-    $("#suppliers-table").on("click", ".btn-delete-supplier", function (e) {
-        if (!confirm("¿Eliminar proveedor?")) {
-            e.preventDefault();
-        }
-    });
 });

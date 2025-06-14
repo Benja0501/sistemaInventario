@@ -29,7 +29,7 @@ class StockEntryPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['supervisor', 'warehouse']);
     }
 
     /**
