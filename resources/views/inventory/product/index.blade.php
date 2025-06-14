@@ -1,70 +1,78 @@
 @extends('layouts.master')
 
 @section('title', 'Productos')
+@section('subtitle', 'Listado de productos')
 
 @section('content')
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="fas fa-box"></i> Productos</h3>
-            <a href="{{ route('products.create') }}" class="btn btn-sm btn-primary">
+            <h3 class="card-title mb-0">Listado de Productos</h3>
+            <a href="{{ route('products.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus-circle"></i> Nuevo Producto
             </a>
         </div>
 
-        <div class="card-body">
+        <div class="card-body py-4">
             <div class="table-responsive">
-                <table id="products-table" class="table table-striped table-hover table-bordered w-100 mb-0">
+                <table id="products-table" class="table table-striped table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>ID</th>
                             <th>SKU</th>
                             <th>Nombre</th>
-                            <th>Precio Unit.</th>
-                            <th>Stock Actual</th>
-                            <th>Stock Mínimo</th>
-                            <th>U. Medida</th>
                             <th>Categoría</th>
-                            <th>Estado</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-center">Estado</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($products as $p)
+                        @forelse($products as $product)
                             <tr>
-                                <td>{{ $p->id }}</td>
-                                <td>{{ $p->sku }}</td>
-                                <td>{{ $p->name }}</td>
-                                <td>{{ number_format($p->unit_price, 2) }}</td>
-                                <td>{{ $p->current_stock }}</td>
-                                <td>{{ $p->min_stock }}</td>
-                                <td>{{ $p->unit_of_measure }}</td>
-                                <td>{{ optional($p->category)->name ?? '-' }}</td>
-                                <td><span class="badge badge-{{ $p->status == 'active' ? 'success' : 'secondary' }}">
-                                        {{ ucfirst($p->status) }}
-                                    </span>
+                                <td>{{ $product->id }}</td>
+                                <td>{{ $product->sku ?? 'N/A' }}</td>
+                                <td>{{ $product->name }}</td>
+                                <td>{{ $product->category->name ?? 'Sin categoría' }}</td>
+                                <td class="text-center">
+                                    @if ($product->stock <= $product->minimum_stock)
+                                        <span class="badge badge-danger">{{ $product->stock }}</span>
+                                    @else
+                                        <span class="badge badge-success">{{ $product->stock }}</span>
+                                    @endif
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('products.show', $p) }}" class="btn btn-sm btn-outline-primary"
+                                    @if ($product->status == 'active')
+                                        <span class="badge badge-success">Activo</span>
+                                    @elseif ($product->status == 'inactive')
+                                        <span class="badge badge-danger">Inactivo</span>
+                                    @else
+                                        <span class="badge badge-warning">Descontinuado</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-outline-primary"
                                         title="Ver">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('products.edit', $p) }}" class="btn btn-sm btn-outline-warning"
+                                    <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-outline-warning"
                                         title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('products.destroy', $p) }}" method="POST" class="d-inline"
-                                        onsubmit="return confirm('¿Eliminar producto?')">
+                                    <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline"
+                                        onsubmit="return confirm('¿Estás seguro? Si el producto tiene historial de movimientos, será DESACTIVADO. De lo contrario, será ELIMINADO.')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="btn btn-sm btn-outline-danger" title="Desactivar o Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center py-4">No hay productos registrados.</td>
+                                <td colspan="7" class="text-center py-4">
+                                    No hay productos registrados.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -72,8 +80,10 @@
             </div>
         </div>
 
-        <div class="card-footer">
-            {{ $products->links() }}
-        </div>
+        @if ($products->hasPages())
+            <div class="card-footer">
+                {{ $products->links() }}
+            </div>
+        @endif
     </div>
 @endsection

@@ -14,7 +14,7 @@
 
         <div class="card-body py-4">
             <div class="table-responsive">
-                <table class="table table-striped table-hover mb-0">
+                <table id="categories-table" class="table table-striped table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>ID</th>

@@ -1,51 +1,27 @@
 @extends('layouts.master')
 
 @section('title', 'Nueva Orden de Compra')
+@section('subtitle', 'Registro de nueva orden')
 
 @section('content')
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3><i class="fas fa-shopping-cart"></i> Nueva Orden</h3>
+        <div class="card-header">
+            <h3 class="card-title">Formulario de Nueva Orden de Compra</h3>
         </div>
         <div class="card-body">
-            <form id="purchase-form" action="{{ route('purchases.store') }}" method="POST">
+            <form action="{{ route('purchases.store') }}" method="POST">
                 @csrf
-
-                {{-- Encabezado --}}
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="order_number">Nº de Orden</label>
-                        <input type="text" name="order_number" id="order_number"
-                            class="form-control @error('order_number') is-invalid @enderror"
-                            value="{{ old('order_number') }}" required>
-                        @error('order_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label for="created_by_user_id">Creada Por</label>
-                        <select name="created_by_user_id" id="created_by_user_id"
-                            class="form-control @error('created_by_user_id') is-invalid @enderror" required>
-                            <option value="">-- Usuario --</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}"
-                                    {{ old('created_by_user_id') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('created_by_user_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-4">
+                {{-- SECCIÓN DEL PROVEEDOR --}}
+                <div class="row">
+                    <div class="col-md-8 form-group">
                         <label for="supplier_id">Proveedor</label>
                         <select name="supplier_id" id="supplier_id"
                             class="form-control @error('supplier_id') is-invalid @enderror" required>
-                            <option value="">-- Proveedor --</option>
-                            @foreach ($suppliers as $sup)
-                                <option value="{{ $sup->id }}" {{ old('supplier_id') == $sup->id ? 'selected' : '' }}>
-                                    {{ $sup->business_name }}
+                            <option value="">-- Seleccione un Proveedor --</option>
+                            @foreach ($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}"
+                                    {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}
+                                    ({{ $supplier->ruc }})
                                 </option>
                             @endforeach
                         </select>
@@ -54,106 +30,132 @@
                         @enderror
                     </div>
                 </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label for="order_date">Fecha Orden</label>
-                        <input type="date" name="order_date" id="order_date"
-                            class="form-control @error('order_date') is-invalid @enderror" value="{{ old('order_date') }}">
-                        @error('order_date')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label for="expected_delivery_date">Fecha Esperada</label>
-                        <input type="date" name="expected_delivery_date" id="expected_delivery_date"
-                            class="form-control @error('expected_delivery_date') is-invalid @enderror"
-                            value="{{ old('expected_delivery_date') }}">
-                        @error('expected_delivery_date')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label for="status">Estado</label>
-                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror"
-                            required>
-                            @foreach (['pending' => 'Pendiente', 'approved' => 'Aprobada', 'rejected' => 'Rechazada', 'sent' => 'Enviada', 'partial_received' => 'Parcial', 'completed' => 'Completada', 'canceled' => 'Cancelada'] as $key => $label)
-                                <option value="{{ $key }}" {{ old('status') == $key ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="form-group">
+                    <label for="remarks">Observaciones</label>
+                    <textarea name="remarks" id="remarks" class="form-control">{{ old('remarks') }}</textarea>
                 </div>
 
-                {{-- Ítems --}}
-                <div class="mb-3">
-                    <h5>Ítems</h5>
-                    <table class="table table-sm table-bordered" id="items-table">
+                <hr>
+
+                {{-- SECCIÓN DE PRODUCTOS --}}
+                <h4 class="mb-3">Detalles de la Orden</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Producto</th>
-                                <th style="width:100px">Cant.</th>
-                                <th style="width:120px">Precio Unit.</th>
-                                <th style="width:120px">Subtotal</th>
-                                <th style="width:50px"></th>
+                                <th style="width: 15%;">Cantidad</th>
+                                <th style="width: 15%;">Precio Unitario (S/)</th>
+                                <th style="width: 15%;">Subtotal</th>
+                                <th style="width: 5%;"></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {{-- fila inicial --}}
-                            <tr class="item-row">
-                                <td>
-                                    <select name="items[0][product_id]" class="form-control product-select" required>
-                                        <option value="">--</option>
-                                        @foreach ($products as $p)
-                                            <option value="{{ $p->id }}" data-price="{{ $p->unit_price }}">
-                                                {{ $p->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td><input type="number" name="items[0][quantity]" class="form-control qty-input"
-                                        min="1" value="1" required></td>
-                                <td><input type="number" name="items[0][unit_price]" class="form-control price-input"
-                                        step="0.01" readonly></td>
-                                <td><input type="text" name="items[0][subtotal]" class="form-control subtotal-input"
-                                        readonly></td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-danger btn-remove-item">&times;</button>
-                                </td>
-                            </tr>
+                        <tbody id="details-body">
+                            {{-- Las filas de productos se añadirán aquí con JS --}}
                         </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="5">
-                                    <button type="button" class="btn btn-sm btn-primary" id="add-item">
-                                        <i class="fas fa-plus-circle"></i> Agregar fila
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th colspan="3" class="text-end">Total:</th>
-                                <th>
-                                    <input type="text" id="total-amount" name="total_amount" class="form-control"
-                                        readonly value="0.00">
-                                </th>
-                                <th></th>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
+                <button type="button" id="add-product-btn" class="btn btn-sm btn-info"><i class="fas fa-plus"></i> Añadir
+                    Producto</button>
 
-                <button class="btn btn-success"><i class="fas fa-save"></i> Guardar Orden</button>
-                <a href="{{ route('purchases.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>
-                    Cancelar</a>
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <h4>Total: S/ <span id="total-display">0.00</span></h4>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ route('purchases.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i>
+                        Volver</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Orden</button>
+                </div>
             </form>
         </div>
     </div>
+
+    {{-- Template para la fila de producto (oculto) --}}
+    <template id="product-row-template">
+        <tr>
+            <td>
+                <select name="details[__INDEX__][product_id]" class="form-control product-select" required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}" data-price="{{ $product->purchase_price ?? 0 }}">
+                            {{ $product->name }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td><input type="number" name="details[__INDEX__][quantity]" class="form-control quantity-input" value="1"
+                    min="1" required></td>
+            <td><input type="number" name="details[__INDEX__][unit_price]" class="form-control price-input" step="0.01"
+                    min="0" required></td>
+            <td><input type="text" class="form-control subtotal-input" readonly></td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row-btn"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    </template>
 @endsection
 
-@section('scripts')
-    <script src="{{ asset('assets/js/purchase_form.js') }}"></script>
-@endsection
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let productIndex = 0;
+            const addProductBtn = document.getElementById('add-product-btn');
+            const detailsBody = document.getElementById('details-body');
+            const productRowTemplate = document.getElementById('product-row-template');
+
+            addProductBtn.addEventListener('click', () => {
+                // --- AQUÍ ESTÁ EL CAMBIO ---
+
+                // 1. Obtenemos el HTML de la plantilla como un texto (string).
+                let templateHtml = productRowTemplate.innerHTML;
+
+                // 2. Reemplazamos el placeholder en ese texto. Esto funciona porque .replace() es para strings.
+                let newRowHtml = templateHtml.replace(/__INDEX__/g, productIndex);
+
+                // 3. Insertamos el nuevo HTML directamente al final del cuerpo de la tabla.
+                detailsBody.insertAdjacentHTML('beforeend', newRowHtml);
+
+                productIndex++;
+            });
+
+            // El resto de tu código para eliminar filas y calcular totales está perfecto y no necesita cambios.
+            detailsBody.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-row-btn') || e.target.closest('.remove-row-btn')) {
+                    e.target.closest('tr').remove();
+                    updateTotal();
+                }
+            });
+
+            detailsBody.addEventListener('change', e => {
+                const tr = e.target.closest('tr');
+                if (!tr) return;
+
+                if (e.target.classList.contains('product-select')) {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const price = selectedOption.dataset.price || 0;
+                    tr.querySelector('.price-input').value = price;
+                }
+
+                updateRowSubtotal(tr);
+            });
+
+            // Función separada para actualizar el subtotal de una fila
+            function updateRowSubtotal(row) {
+                const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const subtotal = (quantity * price).toFixed(2);
+                row.querySelector('.subtotal-input').value = subtotal;
+                updateTotal();
+            }
+
+            function updateTotal() {
+                let total = 0;
+                document.querySelectorAll('#details-body tr').forEach(tr => {
+                    const subtotal = parseFloat(tr.querySelector('.subtotal-input').value) || 0;
+                    total += subtotal;
+                });
+                document.getElementById('total-display').textContent = total.toFixed(2);
+            }
+        });
+    </script>
+@endpush

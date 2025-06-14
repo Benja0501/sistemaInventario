@@ -1,71 +1,140 @@
 @extends('layouts.master')
 
 @section('title', 'Ver Orden de Compra')
+@section('subtitle', 'Detalles de la orden #' . $purchaseOrder->id)
 
 @section('content')
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fas fa-shopping-cart"></i> Detalle Orden #{{ $purchaseOrder->order_number }}</h3>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">ID</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->id }}</dd>
-                <dt class="col-sm-3">Nº Orden</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->order_number }}</dd>
-                <dt class="col-sm-3">Proveedor</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->supplier->business_name }}</dd>
-                <dt class="col-sm-3">Creada Por</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->creator->name }}</dd>
-                <dt class="col-sm-3">Fecha Orden</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->order_date?->format('d/m/Y H:i') }}</dd>
-                <dt class="col-sm-3">Entrega Esperada</dt>
-                <dd class="col-sm-9">{{ $purchaseOrder->expected_delivery_date?->format('d/m/Y') }}</dd>
-                <dt class="col-sm-3">Total</dt>
-                <dd class="col-sm-9">
-                    {{ number_format($purchaseOrder->total_amount, 2) }}
-                </dd>
-                <dt class="col-sm-3">Estado</dt>
-                <dd class="col-sm-9">
-                    <span
-                        class="badge badge-{{ match ($purchaseOrder->status) {
-                            'pending' => 'secondary',
-                            'approved' => 'primary',
-                            'rejected' => 'danger',
-                            'sent' => 'info',
-                            'partial_received' => 'warning',
-                            'completed' => 'success',
-                            'canceled' => 'dark',
-                            default => 'secondary',
-                        } }}">{{ ucfirst(str_replace('_', ' ', $purchaseOrder->status)) }}</span>
-                </dd>
-            </dl>
+    <div class="row">
+        {{-- Panel de Detalles Principales --}}
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Orden de Compra #{{ $purchaseOrder->id }}</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Proveedor</dt>
+                        <dd class="col-sm-9">{{ $purchaseOrder->supplier->name }}</dd>
 
-            <h5>Items</h5>
-            <table class="table table-sm table-bordered">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cant.</th>
-                        <th>Precio Unit.</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($purchaseOrder->items as $item)
-                        <tr>
-                            <td>{{ $item->product->name }}</td>
-                            <td>{{ $item->quantity }}</td>
-                            <td>{{ number_format($item->unit_price, 2) }}</td>
-                            <td>{{ number_format($item->quantity * $item->unit_price, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                        <dt class="col-sm-3">Estado</dt>
+                        <dd class="col-sm-9"><span class="badge badge-info">{{ ucfirst($purchaseOrder->status) }}</span>
+                        </dd>
 
-            <a href="{{ route('purchases.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
+                        <dt class="col-sm-3">Total</dt>
+                        <dd class="col-sm-9">S/ {{ number_format($purchaseOrder->total, 2) }}</dd>
+
+                        <dt class="col-sm-3">Creado por</dt>
+                        <dd class="col-sm-9">{{ $purchaseOrder->user->name }} el
+                            {{ $purchaseOrder->created_at->format('d/m/Y') }}</dd>
+
+                        @if ($purchaseOrder->approver)
+                            <dt class="col-sm-3">Aprobado por</dt>
+                            <dd class="col-sm-9">{{ $purchaseOrder->approver->name }} el
+                                {{ $purchaseOrder->approved_at->format('d/m/Y') }}</dd>
+                        @endif
+                    </dl>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="row">
+        {{-- Panel de Productos Pedidos --}}
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title">Productos Pedidos</h4>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($purchaseOrder->details as $detail)
+                                <tr>
+                                    <td>{{ $detail->product->name }}</td>
+                                    <td>{{ $detail->quantity }}</td>
+                                    <td>S/ {{ number_format($detail->unit_price, 2) }}</td>
+                                    <td>S/ {{ number_format($detail->quantity * $detail->unit_price, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- =============================================== --}}
+    {{-- SECCIÓN DE ACCIONES CONDICIONALES --}}
+    {{-- =============================================== --}}
+
+    {{-- Si la orden está PENDIENTE y eres SUPERVISOR, puedes aprobarla --}}
+    @if ($purchaseOrder->status == 'pending' && auth()->user()->role == 'supervisor')
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title">Acciones de Aprobación</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('purchases.approve', $purchaseOrder) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-success"><i class="fas fa-check-circle"></i> Aprobar Orden de
+                        Compra</button>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    {{-- Si la orden está APROBADA y eres de ALMACÉN o SUPERVISOR, puedes registrar la recepción --}}
+    @if ($purchaseOrder->status == 'approved' && in_array(auth()->user()->role, ['supervisor', 'warehouse']))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title">Registrar Recepción de Mercadería</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('purchases.receive', $purchaseOrder) }}" method="POST">
+                    @csrf
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant. Pedida</th>
+                                <th>Cant. Recibida</th>
+                                <th>Lote</th>
+                                <th>F. Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($purchaseOrder->details as $detail)
+                                <tr>
+                                    <input type="hidden" name="details[{{ $loop->index }}][product_id]"
+                                        value="{{ $detail->product_id }}">
+                                    <td>{{ $detail->product->name }}</td>
+                                    <td>{{ $detail->quantity }}</td>
+                                    <td><input type="number" name="details[{{ $loop->index }}][quantity]"
+                                            class="form-control" value="{{ $detail->quantity }}"
+                                            max="{{ $detail->quantity }}" min="0"></td>
+                                    <td><input type="text" name="details[{{ $loop->index }}][batch]"
+                                            class="form-control"></td>
+                                    <td><input type="date" name="details[{{ $loop->index }}][expiration_date]"
+                                            class="form-control"></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-truck-loading"></i> Confirmar y
+                        Registrar Ingreso</button>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <a href="{{ route('purchases.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al
+        Listado</a>
 @endsection

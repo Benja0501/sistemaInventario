@@ -1,71 +1,76 @@
 @extends('layouts.master')
+
 @section('title', 'Órdenes de Compra')
+@section('subtitle', 'Listado de órdenes de compra')
+
 @section('content')
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="fas fa-shopping-cart"></i> Órdenes de Compra</h3>
-            <a href="{{ route('purchases.create') }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus-circle"></i> Nueva Orden
-            </a>
+            <h3 class="card-title mb-0">Listado de Órdenes de Compra</h3>
+            {{-- Solo usuarios de Compras o Supervisores pueden crear órdenes --}}
+            @if (in_array(auth()->user()->role, ['supervisor', 'purchasing']))
+                <a href="{{ route('purchases.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Nueva Orden
+                </a>
+            @endif
         </div>
-        <div class="card-body">
+
+        <div class="card-body py-4">
             <div class="table-responsive">
-                <table id="purchases-table" class="table table-striped table-hover table-bordered w-100 mb-0">
+                <table id="purchases-table" class="table table-striped table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>ID</th>
-                            <th>Nº Orden</th>
-                            <th>Fecha</th>
                             <th>Proveedor</th>
-                            <th>Creada Por</th>
-                            <th>Total</th>
-                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th class="text-right">Total</th>
+                            <th class="text-center">Estado</th>
+                            <th>Creado por</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($orders as $order)
+                        @forelse($purchaseOrders as $order)
                             <tr>
-                                <td>{{ $order->id }}</td>
-                                <td>{{ $order->order_number }}</td>
-                                <td>{{ $order->order_date?->format('d/m/Y') }}</td>
-                                <td>{{ $order->supplier->business_name }}</td>
-                                <td>{{ $order->creator->name }}</td>
-                                <td>{{ number_format($order->total_amount, 2) }}</td>
-                                <td>
-                                    <span
-                                        class="badge badge-{{ match ($order->status) {
-                                            'pending' => 'secondary',
-                                            'approved' => 'primary',
-                                            'rejected' => 'danger',
-                                            'sent' => 'info',
-                                            'partial_received' => 'warning',
-                                            'completed' => 'success',
-                                            'canceled' => 'dark',
-                                            default => 'secondary',
-                                        } }}">
-                                        {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                                    </span>
-                                </td>
+                                <td>#{{ $order->id }}</td>
+                                <td>{{ $order->supplier->name ?? 'N/A' }}</td>
+                                <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                                <td class="text-right">S/ {{ number_format($order->total, 2) }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('purchases.show', $order) }}" class="btn btn-sm btn-outline-primary"><i
-                                            class="fas fa-eye"></i></a>
-                                    <a href="{{ route('purchases.edit', $order) }}"
-                                        class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('purchases.destroy', $order) }}" method="POST" class="d-inline"
-                                        onsubmit="return confirm('¿Eliminar orden?')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                    </form>
+                                    @if ($order->status == 'pending')
+                                        <span class="badge badge-warning">Pendiente</span>
+                                    @elseif($order->status == 'approved')
+                                        <span class="badge badge-info">Aprobada</span>
+                                    @elseif($order->status == 'completed')
+                                        <span class="badge badge-success">Completada</span>
+                                    @elseif($order->status == 'partial_received')
+                                        <span class="badge badge-primary">Recepción Parcial</span>
+                                    @elseif($order->status == 'canceled')
+                                        <span class="badge badge-danger">Cancelada</span>
+                                    @endif
+                                </td>
+                                <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('purchases.show', $order) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Ver y Gestionar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4">No hay órdenes de compra registradas.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="card-footer">{{ $orders->links() }}</div>
+
+        @if ($purchaseOrders->hasPages())
+            <div class="card-footer">
+                {{ $purchaseOrders->links() }}
+            </div>
+        @endif
     </div>
 @endsection
-<script src="{{ asset('assets/js/purchase.js') }}"></script>
-<script src="{{ asset('assets/js/purchase_items.js') }}"></script>

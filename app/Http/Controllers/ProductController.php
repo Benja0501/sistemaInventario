@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;    
+use App\Models\Category;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\StockEntry;
+use App\Models\StockExit;
 
 class ProductController extends Controller
 {
@@ -41,7 +43,20 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return view('inventory.product.show', compact('product'));
+        // Unimos las últimas 5 entradas y 5 salidas para este producto
+        $entries = StockEntry::where('product_id', $product->id)->latest()->limit(5);
+        $exits = StockExit::where('product_id', $product->id)->latest()->limit(5);
+
+        $recentMovements = $entries->get()->map(function ($entry) {
+            $entry->type = 'entry';
+            return $entry;
+        })->concat($exits->get()->map(function ($exit) {
+            $exit->type = 'exit';
+            $exit->created_at = $exit->exited_at;
+            return $exit;
+        }))->sortByDesc('created_at')->take(5);
+
+        return view('inventory.product.show', compact('product', 'recentMovements'));
     }
 
     /**
@@ -76,7 +91,7 @@ class ProductController extends Controller
 
         // Si no tiene ningún historial (ej: se creó por error), se puede eliminar.
         $product->delete();
-        
+
         return redirect()->route('products.index')->with('success', 'Producto eliminado con éxito.');
     }
 }

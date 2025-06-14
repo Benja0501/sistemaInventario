@@ -31,24 +31,28 @@
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="{{ asset('assets/js/datepicker/jquery-ui.min.js') }}"></script>
 @php
-    $routeName = \Route::currentRouteName() ?? '';
-    $parts = explode('.', $routeName);
-    $viewKey = $parts[0] ?? null;
-    // prueba tanto plural como singular:
+    $routeName = \Route::currentRouteName() ?? ''; // e.g., 'categories.index'
+    $baseName = explode('.', $routeName)[0] ?? null; // e.g., 'categories'
+
     $candidates = [];
-    if ($viewKey) {
-        $candidates[] = $viewKey; // e.g. "users"
-        $candidates[] = rtrim($viewKey, 's'); // e.g. "user"
+    if ($baseName) {
+        // Usamos la función de Laravel que convierte plural a singular de forma inteligente
+        // 'categories' se convierte en 'category'
+        $singularName = Illuminate\Support\Str::singular($baseName);
+
+        $candidates[] = $baseName; // Ahora buscará 'categories.js'
+        $candidates[] = $singularName; // Y también buscará 'category.js'
     }
 @endphp
 
-@foreach ($candidates as $key)
+{{-- Usamos array_unique para no buscar dos veces si el nombre es el mismo en singular y plural --}}
+@foreach (array_unique($candidates) as $key)
     @if (is_file(public_path("assets/js/{$key}.js")))
         <script src="{{ asset("assets/js/{$key}.js") }}"></script>
         @break
     @endif
 @endforeach
-
+@stack('scripts')
 </body>
 
 </html>

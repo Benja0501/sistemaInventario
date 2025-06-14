@@ -86,16 +86,16 @@ class PurchaseOrderController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PurchaseOrder $purchaseOrder)
-    {
-        if ($purchaseOrder->status !== 'pending') {
-            return redirect()->route('purchases.show', $purchaseOrder)->with('error', 'Solo se pueden editar órdenes en estado "Pendiente".');
-        }
+    // public function edit(PurchaseOrder $purchaseOrder)
+    // {
+    //     if ($purchaseOrder->status !== 'pending') {
+    //         return redirect()->route('purchases.show', $purchaseOrder)->with('error', 'Solo se pueden editar órdenes en estado "Pendiente".');
+    //     }
 
-        $suppliers = Supplier::where('status', 'active')->get();
-        $products = Product::where('status', 'active')->get();
-        return view('inventory.purchase.edit', compact('purchaseOrder', 'suppliers', 'products'));
-    }
+    //     $suppliers = Supplier::where('status', 'active')->get();
+    //     $products = Product::where('status', 'active')->get();
+    //     return view('inventory.purchase.edit', compact('purchaseOrder', 'suppliers', 'products'));
+    // }
 
     /**
      * Update the specified resource in storage.
