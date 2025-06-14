@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PurchaseOrder;
+use App\Models\StockEntry;
+use App\Models\StockExit;
+use App\Models\DiscrepancyReport;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -20,16 +24,21 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validated();
-        
-        User::create($validatedData);
-
+        User::create($request->validated());
         return redirect()->route('users.index')->with('success', 'Usuario creado con éxito.');
     }
 
     public function show(User $user)
     {
-        return view('inventory.user.show', compact('user'));
+        // Contamos las actividades clave asociadas a este usuario
+        $stats = [
+            'purchase_orders' => PurchaseOrder::where('user_id', $user->id)->count(),
+            'stock_entries' => StockEntry::where('user_id', $user->id)->count(),
+            'stock_exits' => StockExit::where('user_id', $user->id)->count(),
+            'discrepancy_reports' => DiscrepancyReport::where('user_id', $user->id)->count(),
+        ];
+
+        return view('inventory.user.show', compact('user', 'stats'));
     }
 
     public function edit(User $user)
@@ -41,6 +50,7 @@ class UserController extends Controller
     {
         $validatedData = $request->validated();
 
+        // Si no se envió una nueva contraseña, la quitamos del array para no sobreescribirla
         if (empty($validatedData['password'])) {
             unset($validatedData['password']);
         }

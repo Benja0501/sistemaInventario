@@ -56,7 +56,6 @@ Route::middleware(['auth'])->group(function () {
     // El Supervisor tiene control total sobre la gestión de usuarios.
     Route::middleware(['role:supervisor'])->group(function () {
         Route::resource('users', UserController::class);
-        // Aquí podrían ir rutas de configuración general del sistema.
     });
 
 
@@ -69,54 +68,30 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('purchases', PurchaseOrderController::class);
 
         // Ruta específica para que el Supervisor apruebe una orden de compra
-        Route::post('purchase-orders/{purchase_order}/approve', [PurchaseOrderController::class, 'approve'])
-            ->name('purchase-orders.approve')
+        Route::post('purchases/{purchase}/approve', [PurchaseOrderController::class, 'approve'])
+            ->name('purchases.approve')
             ->middleware('role:supervisor');
     });
 
 
     // --- RUTAS PARA ALMACÉN Y SUPERVISOR ---
-    // Estos roles gestionan el inventario físico y los movimientos.
     Route::middleware(['role:supervisor,warehouse'])->group(function () {
-        // Ruta para registrar la recepción de una orden de compra
-        Route::post('purchase-orders/{purchase_order}/receive', [PurchaseOrderController::class, 'registerReception'])
-            ->name('purchase-orders.receive');
-
-        // Rutas para registrar salidas manuales (merma, etc.)
-        Route::resource('exits', StockExitController::class)->only(['create', 'store']);
-
-        // Rutas para los informes de discrepancia
+        Route::post('purchases/{purchase}/receive', [PurchaseOrderController::class, 'registerReception'])
+            ->name('purchases.receive');
+        
+        // --- RUTAS CORREGIDAS Y UNIFICADAS ---
+        Route::resource('exits', StockExitController::class)->only(['index', 'create', 'store']);
         Route::resource('discrepancies', DiscrepancyReportController::class);
-
-        // Ruta para que el Supervisor apruebe el ajuste de stock de un informe
+        Route::get('entries/create', [StockEntryController::class, 'create'])->name('stock-entries.create');
+        Route::post('entries', [StockEntryController::class, 'store'])->name('stock-entries.store');
+        
         Route::post('discrepancies/{discrepancy}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
             ->name('discrepancies.adjust')
             ->middleware('role:supervisor');
-        Route::get('stock-entries/create', [StockEntryController::class, 'create'])->name('stock-entries.create');
-        Route::post('stock-entries', [StockEntryController::class, 'store'])->name('stock-entries.store');
     });
 
     // --- RUTAS DE CONSULTA ---
     // Rutas que solo muestran información y podrían ser accesibles para más roles
     Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
-    Route::get('exits', [StockExitController::class, 'index'])->name('exits.index');
 
-});
-
-Route::get('/debug-db-schema', function () {
-    try {
-        // Esta consulta le pregunta directamente a SQL Server cómo es la tabla 'users'
-        $schema = DB::select("
-            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = 'users'
-        ");
-        
-        // Muestra el resultado en formato JSON para que podamos leerlo fácilmente
-        return response()->json($schema);
-
-    } catch (\Exception $e) {
-        // Si hay algún error de conexión, también lo veremos
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
 });
