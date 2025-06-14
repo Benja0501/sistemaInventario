@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->integer('quantity');
             $table->string('type'); // e.g., Sale, Waste, Discrepancy Adjustment
             $table->text('reason')->nullable();
-            $table->timestamp('exited_at');
+            $table->timestamp('exited_at',3);
             $table->timestamps(3);
         });
     }

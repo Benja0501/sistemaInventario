@@ -95,3 +95,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
 
 });
+
+// routes/web.php
+
+use Illuminate\Support\Facades\DB;
+
+// Ruta temporal solo para depuración. Puedes borrarla después.
+Route::get('/debug-po-schema', function () {
+    try {
+        // Le preguntamos directamente a SQL Server cómo es la tabla 'purchase_orders'
+        $schema = DB::select("
+            SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = 'purchase_orders'
+        ");
+        
+        return response()->json($schema);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained('suppliers');
             $table->foreignId('user_id')->comment('User who created the order')->constrained('users');
             $table->foreignId('approved_by_id')->nullable()->comment('User who approved')->constrained('users');
-            $table->timestamp('approved_at')->nullable();
+            $table->timestamp('approved_at', 3)->nullable();
             $table->decimal('total', 10, 2);
             $table->enum('status', [
                 'pending',

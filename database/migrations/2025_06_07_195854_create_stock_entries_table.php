@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->integer('quantity');
             $table->string('batch')->nullable(); // Batch number
             $table->date('expiration_date')->nullable();
-            $table->timestamp('received_at');
+            $table->timestamp('received_at',3);
             $table->timestamps(3);
         });
     }
