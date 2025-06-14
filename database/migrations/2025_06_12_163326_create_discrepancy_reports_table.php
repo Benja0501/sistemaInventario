@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->date('count_date');
             $table->string('status')->default('Open'); // Open, In Review, Closed/Adjusted
             $table->text('general_remarks')->nullable();
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

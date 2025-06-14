@@ -13,7 +13,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::latest()->paginate(10);
+        $categories = Category::withCount('products')->latest()->paginate(10);
         return view('inventory.category.index', compact('categories'));
     }
 
@@ -39,6 +39,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        $category->load('products');
         return view('inventory.category.show', compact('category'));
     }
 

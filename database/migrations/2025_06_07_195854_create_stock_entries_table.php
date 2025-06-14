@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('batch')->nullable(); // Batch number
             $table->date('expiration_date')->nullable();
             $table->timestamp('received_at');
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

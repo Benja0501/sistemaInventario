@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

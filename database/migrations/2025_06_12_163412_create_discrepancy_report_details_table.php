@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->integer('physical_quantity');
             $table->integer('difference');
             $table->text('justification')->nullable();
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

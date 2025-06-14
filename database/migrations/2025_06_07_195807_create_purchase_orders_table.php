@@ -26,7 +26,7 @@ return new class extends Migration
                 'canceled'
             ])->default('pending');
             $table->text('remarks')->nullable();
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

@@ -21,7 +21,7 @@ return new class extends Migration
             // El precio al que el producto se vende al cliente final.
             $table->decimal('sale_price', 10, 2)->default(0); 
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamps();
+            $table->timestamps(3);
         });
     }
 

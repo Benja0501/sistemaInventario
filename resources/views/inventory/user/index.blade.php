@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body py-4">
             <div class="table-responsive">
                 <table id="users-table" class="table table-striped table-hover mb-0">
                     <thead class="thead-light">
