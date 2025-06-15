@@ -39,7 +39,7 @@
                                 <td>{{ $exit->user->name ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     {{-- El show de esta vista es opcional, pero dejamos el botón por si se crea en el futuro --}}
-                                    <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                                    <a href="{{ route('exits.show', $exit) }}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>

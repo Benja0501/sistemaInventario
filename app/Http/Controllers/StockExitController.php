@@ -71,11 +71,11 @@ class StockExitController extends Controller
     /**
      * Display the specified resource.
      */
-    // public function show(StockExit $stockExit)
-    // {
-    //     $stockExit->load(['product', 'user']);
-    //     return view('inventory.exit.show', compact('stockExit'));
-    // }
+    public function show(StockExit $stockExit)
+    {
+        $stockExit->load(['product', 'user']);
+        return view('inventory.exit.show', compact('stockExit'));
+    }
 
     /**
      * Show the form for editing the specified resource.

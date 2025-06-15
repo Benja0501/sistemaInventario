@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\PurchaseOrderApproved;
+use App\Notifications\PurchaseOrderRejected;   
+use App\Notifications\ProductReceivedExpired; 
 
 class PurchaseOrderController extends Controller
 {
@@ -197,7 +199,7 @@ class PurchaseOrderController extends Controller
                     Product::find($itemRecibido['product_id'])->increment('stock', $cantidad);
 
                     // Registrar el movimiento en la tabla de entradas
-                    StockEntry::create([
+                    $entry = StockEntry::create([
                         'product_id' => $itemRecibido['product_id'],
                         'purchase_order_id' => $purchase->id,
                         'user_id' => auth()->id(),
@@ -206,6 +208,10 @@ class PurchaseOrderController extends Controller
                         'expiration_date' => $itemRecibido['expiration_date'],
                         'received_at' => now(),
                     ]);
+                    if ($entry->expiration_date && $entry->expiration_date->isPast()) {
+                        $supervisors = User::where('role', 'supervisor')->get();
+                        Notification::send($supervisors, new ProductReceivedExpired($entry));
+                    }
                     $totalRecibido += $cantidad;
                 }
             }

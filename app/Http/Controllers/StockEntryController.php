@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Http\Requests\StoreStockEntryRequest;
 use App\Http\Requests\UpdateStockEntryRequest;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Notifications\ProductReceivedExpired;
+use App\Http\Controllers\NotificationController;
 
 class StockEntryController extends Controller
 {
@@ -36,7 +39,7 @@ class StockEntryController extends Controller
 
         DB::transaction(function () use ($request) {
             // 1. Crear el registro de la entrada de stock
-            StockEntry::create([
+            $entry = StockEntry::create([
                 'product_id' => $request->product_id,
                 'user_id' => auth()->id(),
                 'quantity' => $request->quantity,
@@ -49,15 +52,19 @@ class StockEntryController extends Controller
 
             // 2. Incrementar el stock del producto
             Product::find($request->product_id)->increment('stock', $request->quantity);
+            if ($entry->expiration_date && $entry->expiration_date->isPast()) {
+                $supervisors = User::where('role', 'supervisor')->get();
+                Notification::send($supervisors, new ProductReceivedExpired($entry));
+            }
         });
 
         return redirect()->route('entries.index')->with('success', 'Entrada manual registrada con éxito.');
     }
-    // public function show(StockEntry $stockEntry)
-    // {
-    //     $stockEntry->load(['product', 'user', 'purchaseOrder']);
-    //     return view('inventory.entry.show', compact('stockEntry'));
-    // }
+    public function show(StockEntry $stockEntry)
+    {
+        $stockEntry->load(['product', 'user', 'purchaseOrder']);
+        return view('inventory.entry.show', compact('stockEntry'));
+    }
     public function edit(StockEntry $stockEntry)
     {
         //

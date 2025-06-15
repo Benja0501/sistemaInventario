@@ -12,9 +12,10 @@ use App\Http\Controllers\StockEntryController;
 use App\Http\Controllers\StockExitController;
 use App\Http\Controllers\DiscrepancyReportController;
 use App\Http\Controllers\NotificationController;
+
 /*
 |--------------------------------------------------------------------------
-| Rutas Públicas
+| Rutas Públicas y de Autenticación
 |--------------------------------------------------------------------------
 */
 
@@ -22,27 +23,18 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-/*
-|--------------------------------------------------------------------------
-| Rutas de Autenticación
-|--------------------------------------------------------------------------
-|
-| Login, registro (solo para el primer usuario), reseteo de contraseña, etc.
-|
-*/
+// Carga las rutas de login, register, etc. desde auth.php
 require __DIR__ . '/auth.php';
+
 
 /*
 |--------------------------------------------------------------------------
-| Panel de Control (Rutas Protegidas)
+| Panel de Control (Rutas Protegidas por Autenticación)
 |--------------------------------------------------------------------------
-|
-| Todas estas rutas requieren que el usuario haya iniciado sesión.
-|
 */
 Route::middleware(['auth'])->group(function () {
 
-    // --- RUTAS COMUNES PARA TODOS LOS ROLES ---
+    // --- RUTAS COMUNES PARA TODOS LOS ROLES LOGUEADOS ---
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -51,56 +43,47 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
-    // --- RUTAS SOLO PARA EL SUPERVISOR ---
-    // El Supervisor tiene control total sobre la gestión de usuarios.
+
+    // --- RUTAS DE GESTIÓN (Protegidas por Roles Específicos) ---
+
+    // Grupo para acciones que solo el Supervisor puede realizar
     Route::middleware(['role:supervisor'])->group(function () {
         Route::resource('users', UserController::class);
+        Route::get('/notifications/create', [NotificationController::class, 'createManual'])->name('notifications.create-manual');
+        Route::post('/notifications', [NotificationController::class, 'storeManual'])->name('notifications.store-manual');
     });
-
-
-    // --- RUTAS PARA COMPRAS Y SUPERVISOR ---
-    // Estos roles gestionan los catálogos y el proceso de compra.
+    
+    // Grupo para Supervisor y Compras (Gestión de catálogos y compras)
     Route::middleware(['role:supervisor,purchasing'])->group(function () {
         Route::resource('suppliers', SupplierController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
         Route::resource('purchases', PurchaseOrderController::class);
 
-        // Ruta específica para que el Supervisor apruebe una orden de compra
         Route::post('purchases/{purchase}/approve', [PurchaseOrderController::class, 'approve'])
             ->name('purchases.approve')
-            ->middleware('role:supervisor');
+            ->middleware('role:supervisor'); // La aprobación sigue siendo solo del supervisor
     });
 
-
-    // --- RUTAS PARA ALMACÉN Y SUPERVISOR ---
+    // Grupo para Supervisor y Almacén (Gestión de stock físico)
     Route::middleware(['role:supervisor,warehouse'])->group(function () {
         Route::post('purchases/{purchase}/receive', [PurchaseOrderController::class, 'registerReception'])
             ->name('purchases.receive');
         
-        // --- RUTAS CORREGIDAS Y UNIFICADAS ---
-        Route::resource('exits', StockExitController::class)->only(['index', 'create', 'store']);
+        Route::resource('entries', StockEntryController::class)->only(['create', 'store']);
+        Route::resource('exits', StockExitController::class)->only(['create', 'store']);
         Route::resource('discrepancies', DiscrepancyReportController::class);
-        Route::get('entries/create', [StockEntryController::class, 'create'])->name('entries.create');
-        Route::post('entries', [StockEntryController::class, 'store'])->name('entries.store');
-        
+
         Route::post('discrepancies/{discrepancy}/adjust', [DiscrepancyReportController::class, 'adjustStock'])
             ->name('discrepancies.adjust')
-            ->middleware('role:supervisor');
+            ->middleware('role:supervisor'); // El ajuste final es solo del supervisor
     });
 
-    // --- RUTAS DE CONSULTA ---
-    // Rutas que solo muestran información y podrían ser accesibles para más roles
-    Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
-    
-    // --- RUTAS PARA NOTIFICACIONES ---
-    // Inbox de notificaciones (accesible para todos los roles logueados)
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    
-    // Rutas para crear y enviar alertas (solo para supervisor)
-    Route::middleware(['role:supervisor'])->group(function () {
-        Route::get('/notifications/create', [NotificationController::class, 'createManual'])->name('notifications.create-manual');
-        Route::post('/notifications', [NotificationController::class, 'storeManual'])->name('notifications.store-manual');
-    });
+    // Grupo para rutas de solo lectura de historiales (accesibles para todos los roles logueados)
+    Route::get('stock-entries', [StockEntryController::class, 'index'])->name('entries.index');
+    Route::get('stock-entries/{stock_entry}', [StockEntryController::class, 'show'])->name('entries.show');
+    Route::get('stock-exits', [StockExitController::class, 'index'])->name('exits.index');
+    Route::get('stock-exits/{stock_exit}', [StockExitController::class, 'show'])->name('exits.show');
 });

@@ -7,8 +7,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title mb-0">Historial de Entradas de Stock</h3>
-            {{-- Solo usuarios de Almacén o Supervisores pueden registrar entradas manuales --}}
             @if (in_array(auth()->user()->role, ['supervisor', 'warehouse']))
+                {{-- MEJORA 3: Ruta estandarizada --}}
                 <a href="{{ route('entries.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus-circle"></i> Registrar Entrada Manual
                 </a>
@@ -28,6 +28,8 @@
                             <th>Lote</th>
                             <th>Vencimiento</th>
                             <th>Registrado por</th>
+                            {{-- MEJORA 1: Columna de Acciones --}}
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,6 +48,7 @@
                                 </td>
                                 <td>
                                     @if ($entry->purchase_order_id)
+                                        {{-- El nombre de la ruta es 'purchases.show' según tu archivo de rutas --}}
                                         <a href="{{ route('purchases.show', $entry->purchase_order_id) }}">Orden
                                             #{{ $entry->purchase_order_id }}</a>
                                     @else
@@ -53,12 +56,34 @@
                                     @endif
                                 </td>
                                 <td>{{ $entry->batch ?? 'N/A' }}</td>
-                                <td>{{ $entry->expiration_date?->format('d/m/Y') ?? 'N/A' }}</td>
+                                <td>
+                                    {{-- MEJORA 2: Resaltado de fechas de vencimiento --}}
+                                    @if ($entry->expiration_date)
+                                        @if ($entry->expiration_date->isPast())
+                                            <span
+                                                class="badge badge-danger">{{ $entry->expiration_date->format('d/m/Y') }}</span>
+                                        @elseif($entry->expiration_date->diffInDays(now()) <= 30)
+                                            <span
+                                                class="badge badge-warning">{{ $entry->expiration_date->format('d/m/Y') }}</span>
+                                        @else
+                                            {{ $entry->expiration_date->format('d/m/Y') }}
+                                        @endif
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
                                 <td>{{ $entry->user->name ?? 'N/A' }}</td>
+                                {{-- MEJORA 1: Botón de Ver --}}
+                                <td class="text-center">
+                                    <a href="{{ route('entries.show', $entry) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="9" class="text-center py-4">
                                     No hay entradas de stock registradas.
                                 </td>
                             </tr>
