@@ -1,69 +1,67 @@
 @extends('layouts.master')
 
-@section('title', 'Discrepancias')
+@section('title', 'Informes de Discrepancia')
+@section('subtitle', 'Historial de conteos y ajustes de inventario')
 
 @section('content')
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3><i class="fas fa-exclamation-triangle"></i> Discrepancias</h3>
-            <a href="{{ route('discrepancies.create') }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus-circle"></i> Nueva
-            </a>
+            <h3 class="card-title mb-0">Historial de Informes de Discrepancia</h3>
+            @if (in_array(auth()->user()->role, ['supervisor', 'warehouse']))
+                <a href="{{ route('discrepancies.create') }}" class="btn btn-warning">
+                    <i class="fas fa-plus-circle"></i> Nuevo Informe de Conteo
+                </a>
+            @endif
         </div>
-        <div class="card-body">
+
+        <div class="card-body py-4">
             <div class="table-responsive">
-                <table id="discrepancies-table" class="table table-striped table-bordered w-100 mb-0">
+                <table id="discrepancies-table" class="table table-striped table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
                             <th>ID</th>
-                            <th>Producto</th>
-                            <th>Sistema</th>
-                            <th>Físico</th>
-                            <th>Tipo</th>
-                            <th>Estado</th>
+                            <th>Fecha de Conteo</th>
+                            <th>Registrado por</th>
+                            <th class="text-center">Estado</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($discrepancies as $d)
+                        @forelse($reports as $report)
                             <tr>
-                                <td>{{ $d->id }}</td>
-                                <td>{{ $d->product->name }}</td>
-                                <td>{{ $d->system_quantity }}</td>
-                                <td>{{ $d->physical_quantity }}</td>
-                                <td>{{ ucfirst($d->discrepancy_type) }}</td>
-                                <td>
-                                    @if ($d->status === 'pending')
-                                        <span class="badge badge-warning">Pendiente</span>
+                                <td>#{{ $report->id }}</td>
+                                <td>{{ $report->count_date->format('d/m/Y') }}</td>
+                                <td>{{ $report->user->name ?? 'N/A' }}</td>
+                                <td class="text-center">
+                                    @if ($report->status == 'open')
+                                        <span class="badge badge-warning">Abierto</span>
                                     @else
-                                        <span class="badge badge-success">Resuelta</span>
+                                        <span class="badge badge-success">Cerrado / Ajustado</span>
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('discrepancies.show', $d) }}" class="btn btn-sm btn-outline-primary"><i
-                                            class="fas fa-eye"></i></a>
-                                    <a href="{{ route('discrepancies.edit', $d) }}" class="btn btn-sm btn-outline-warning"><i
-                                            class="fas fa-edit"></i></a>
-                                    <form action="{{ route('discrepancies.destroy', $d) }}" method="POST" class="d-inline">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger btn-delete-dis"><i
-                                                class="fas fa-trash"></i></button>
-                                    </form>
+                                    <a href="{{ route('discrepancies.show', $report) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Ver y Procesar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">No hay discrepancias registradas.</td>
+                                <td colspan="5" class="text-center py-4">
+                                    No hay informes de discrepancia registrados.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="card-footer">{{ $discrepancies->links() }}</div>
-    </div>
-@endsection
 
-@section('scripts')
-    <script src="{{ asset('assets/js/discrepancy.js') }}"></script>
+        @if ($reports->hasPages())
+            <div class="card-footer">
+                {{ $reports->links() }}
+            </div>
+        @endif
+    </div>
 @endsection

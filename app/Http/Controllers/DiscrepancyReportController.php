@@ -77,16 +77,16 @@ class DiscrepancyReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DiscrepancyReport $discrepancyReport)
+    public function show(DiscrepancyReport $discrepancy)
     {
-        $discrepancyReport->load(['user', 'details.product']);
-        return view('inventory.discrepancy.show', compact('discrepancyReport'));
+        $discrepancy->load(['user', 'details.product']);
+        return view('inventory.discrepancy.show', compact('discrepancy'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DiscrepancyReport $discrepancyReport)
+    public function edit(DiscrepancyReport $discrepancy)
     {
         //
     }
@@ -94,7 +94,7 @@ class DiscrepancyReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDiscrepancyReportRequest $request, DiscrepancyReport $discrepancyReport)
+    public function update(UpdateDiscrepancyReportRequest $request, DiscrepancyReport $discrepancy)
     {
         //
     }
@@ -102,7 +102,7 @@ class DiscrepancyReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DiscrepancyReport $discrepancyReport)
+    public function destroy(DiscrepancyReport $discrepancy)
     {
         //
     }
@@ -112,15 +112,15 @@ class DiscrepancyReportController extends Controller
      * Procesa un informe y ajusta el stock para que coincida con el conteo físico.
      * Esta acción solo debe ser ejecutada por un Supervisor.
      */
-    public function adjustStock(DiscrepancyReport $discrepancyReport)
+    public function adjustStock(DiscrepancyReport $discrepancy)
     {
         // Solo se pueden procesar informes en estado 'open'
-        if ($discrepancyReport->status !== 'open') {
+        if ($discrepancy->status !== 'open') {
             return redirect()->back()->with('error', 'Este informe ya ha sido procesado.');
         }
 
-        DB::transaction(function () use ($discrepancyReport) {
-            foreach ($discrepancyReport->details as $detail) {
+        DB::transaction(function () use ($discrepancy) {
+            foreach ($discrepancy->details as $detail) {
                 $product = $detail->product;
                 $difference = $detail->difference;
 
@@ -142,7 +142,7 @@ class DiscrepancyReportController extends Controller
                         'user_id' => auth()->id(),
                         'quantity' => abs($difference), // usamos el valor absoluto
                         'type' => 'Discrepancy Adjustment',
-                        'reason' => 'Ajuste basado en informe de discrepancia #' . $discrepancyReport->id,
+                        'reason' => 'Ajuste basado en informe de discrepancia #' . $discrepancy->id,
                         'exited_at' => now(),
                     ]);
                 }
@@ -152,9 +152,9 @@ class DiscrepancyReportController extends Controller
             }
             
             // Cerrar el informe para que no se pueda procesar de nuevo
-            $discrepancyReport->update(['status' => 'closed']);
+            $discrepancy->update(['status' => 'closed']);
         });
 
-        return redirect()->route('discrepancies.show', $discrepancyReport)->with('success', 'El stock ha sido ajustado según el informe.');
+        return redirect()->route('discrepancies.show', $discrepancy)->with('success', 'El stock ha sido ajustado según el informe.');
     }
 }

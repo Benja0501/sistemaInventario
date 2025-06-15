@@ -13,22 +13,22 @@ $(document).ready(function () {
         buttons: [
             {
                 extend: "copy",
-                text: '<i class="far fa-copy"></i>',
+                text: '<i class="far fa-copy"></i> Copiar',
                 className: "btn btn-sm btn-outline-secondary",
             },
             {
                 extend: "excel",
-                text: '<i class="fas fa-file-excel"></i>',
+                text: '<i class="fas fa-file-excel"></i> Excel',
                 className: "btn btn-sm btn-outline-success",
             },
             {
                 extend: "pdf",
-                text: '<i class="fas fa-file-pdf"></i>',
+                text: '<i class="fas fa-file-pdf"></i> PDF',
                 className: "btn btn-sm btn-outline-danger",
             },
             {
                 extend: "csv",
-                text: '<i class="fas fa-file-csv"></i>',
+                text: '<i class="fas fa-file-csv"></i> CSV',
                 className: "btn btn-sm btn-outline-info",
             },
         ],

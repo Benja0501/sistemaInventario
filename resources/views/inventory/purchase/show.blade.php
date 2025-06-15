@@ -104,7 +104,49 @@
             <div class="card-body">
                 {{-- CORRECCIÓN: Nombre de la ruta estandarizado --}}
                 <form action="{{ route('purchases.receive', $purchase) }}" method="POST">
-                    {{-- ... (El resto de este formulario está bien) ... --}}
+                    <form action="{{ route('purchases.receive', $purchase) }}" method="POST">
+                        @csrf
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cant. Pedida</th>
+                                        <th class="text-center">Cant. Recibida</th>
+                                        <th>Lote</th>
+                                        <th>F. Vencimiento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($purchase->details as $detail)
+                                        <tr>
+                                            {{-- Input oculto para enviar el ID del producto --}}
+                                            <input type="hidden" name="details[{{ $loop->index }}][product_id]"
+                                                value="{{ $detail->product_id }}">
+
+                                            <td>{{ $detail->product->name ?? 'PRODUCTO NO ENCONTRADO' }}</td>
+                                            <td class="text-center">{{ $detail->quantity }}</td>
+                                            <td>
+                                                <input type="number" name="details[{{ $loop->index }}][quantity]"
+                                                    class="form-control" value="{{ $detail->quantity }}"
+                                                    max="{{ $detail->quantity }}" min="0" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="details[{{ $loop->index }}][batch]"
+                                                    class="form-control">
+                                            </td>
+                                            <td>
+                                                <input type="date" name="details[{{ $loop->index }}][expiration_date]"
+                                                    class="form-control">
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-truck-loading"></i> Confirmar y
+                            Registrar Ingreso</button>
+                    </form>
                 </form>
             </div>
         </div>
