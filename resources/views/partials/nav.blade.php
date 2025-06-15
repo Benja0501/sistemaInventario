@@ -20,6 +20,17 @@
                 <span class="app-menu__label">Dashboard</span>
             </a>
         </li>
+        <li>
+            <a class="app-menu__item {{ request()->is('notifications*') ? 'active' : '' }}"
+                href="{{ route('notifications.index') }}">
+                <i class="app-menu__icon fa fa-bell"></i>
+                <span class="app-menu__label">Notificaciones</span>
+                {{-- Añadimos un contador de notificaciones no leídas --}}
+                @if (auth()->user()->unreadNotifications->count() > 0)
+                    <span class="badge badge-danger">{{ auth()->user()->unreadNotifications->count() }}</span>
+                @endif
+            </a>
+        </li>
 
         {{-- MENÚ SOLO PARA SUPERVISOR --}}
         @if (auth()->user()->role == 'supervisor')
@@ -71,8 +82,8 @@
                     {{-- LÍNEAS CORREGIDAS: Nombres de rutas --}}
                     <li><a class="treeview-item" href="{{ route('entries.index') }}"><i
                                 class="icon fa fa-arrow-down"></i> Entradas</a></li>
-                    <li><a class="treeview-item" href="{{ route('exits.index') }}"><i
-                                class="icon fa fa-arrow-up"></i> Salidas</a></li>
+                    <li><a class="treeview-item" href="{{ route('exits.index') }}"><i class="icon fa fa-arrow-up"></i>
+                            Salidas</a></li>
                     <li><a class="treeview-item" href="{{ route('discrepancies.index') }}"><i
                                 class="icon fa fa-exclamation-triangle"></i> Discrepancias</a></li>
                 </ul>

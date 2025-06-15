@@ -53,11 +53,11 @@ class StockEntryController extends Controller
 
         return redirect()->route('entries.index')->with('success', 'Entrada manual registrada con éxito.');
     }
-    public function show(StockEntry $stockEntry)
-    {
-        $stockEntry->load(['product', 'user', 'purchaseOrder']);
-        return view('inventory.entry.show', compact('stockEntry'));
-    }
+    // public function show(StockEntry $stockEntry)
+    // {
+    //     $stockEntry->load(['product', 'user', 'purchaseOrder']);
+    //     return view('inventory.entry.show', compact('stockEntry'));
+    // }
     public function edit(StockEntry $stockEntry)
     {
         //

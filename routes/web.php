@@ -11,7 +11,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\StockEntryController;
 use App\Http\Controllers\StockExitController;
 use App\Http\Controllers\DiscrepancyReportController;
-
+use App\Http\Controllers\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -93,5 +93,14 @@ Route::middleware(['auth'])->group(function () {
     // --- RUTAS DE CONSULTA ---
     // Rutas que solo muestran información y podrían ser accesibles para más roles
     Route::get('entries', [StockEntryController::class, 'index'])->name('entries.index');
-
+    
+    // --- RUTAS PARA NOTIFICACIONES ---
+    // Inbox de notificaciones (accesible para todos los roles logueados)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    
+    // Rutas para crear y enviar alertas (solo para supervisor)
+    Route::middleware(['role:supervisor'])->group(function () {
+        Route::get('/notifications/create', [NotificationController::class, 'createManual'])->name('notifications.create-manual');
+        Route::post('/notifications', [NotificationController::class, 'storeManual'])->name('notifications.store-manual');
+    });
 });
